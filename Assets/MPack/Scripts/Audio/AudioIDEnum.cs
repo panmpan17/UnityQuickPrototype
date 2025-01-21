@@ -1,0 +1,26 @@
+namespace MPack {
+	public enum AudioIDEnum {
+		MissingType = 0,
+		MenuOpen = 1,
+		MenuClose = 2,
+		NewBuilding = 3,
+		Cancel = 4,
+		ChopTree = 5,
+		PlantTree = 6,
+		MenuClick = 7,
+		Jump = 8,
+		DoorOpen = 9,
+		DoorClose = 10,
+		MineBlock = 11,
+		BuilderHammered = 12,
+		TimescaleChange = 13,
+		OpenStorage = 14,
+		PlaceBuilding = 15,
+		TreeFall = 16,
+		TreeFallGround = 17,
+		SawWood = 18,
+		GatherItem = 19,
+		PutDownItem = 20,
+		PickupItem = 21,
+	}
+}
