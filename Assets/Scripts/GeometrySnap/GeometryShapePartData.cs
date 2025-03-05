@@ -3,7 +3,7 @@ using UnityEngine;
 public interface IGeometryShapePart
 {
     ShapeDirection ShapeDirection { get; }
-    Vector3[] Vertices { get; }
+    Vector2[] Vertices { get; }
     int[] Triangles { get; }
 }
 
@@ -22,13 +22,13 @@ public class GeometryShapePartData : ScriptableObject, IGeometryShapePart
     private ShapeDirection shapeDirection;
     public ShapeDirection ShapeDirection => shapeDirection;
     [SerializeField]
-    private Vector3[] vertices;
-    public Vector3[] Vertices => vertices;
+    private Vector2[] vertices;
+    public Vector2[] Vertices => vertices;
     [SerializeField]
     private int[] triangles;
     public int[] Triangles => triangles;
 
-    public void SetData(Vector3[] vertices, int[] triangles, ShapeDirection shapeDirection)
+    public void SetData(Vector2[] vertices, int[] triangles, ShapeDirection shapeDirection)
     {
         this.shapeDirection = shapeDirection;
         this.vertices = vertices;

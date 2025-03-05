@@ -13,10 +13,16 @@ public enum GizmosDrawType
 [RequireComponent(typeof(MeshRenderer))]
 public class GeometryBaseShape : MonoBehaviour, IGeometryShapePart
 {
-    static Mesh CreateMesh(Vector3[] vertices, int[] triangles)
+    static Mesh CreateMesh(Vector2[] vertices, int[] triangles)
     {
         Mesh mesh = new Mesh();
-        mesh.vertices = vertices;
+
+        Vector3[] vertices3D = new Vector3[vertices.Length];
+        for (int i = 0; i < vertices.Length; i++)
+        {
+            vertices3D[i] = new Vector3(vertices[i].x, vertices[i].y, 0);
+        }
+        mesh.vertices = vertices3D;
         mesh.triangles = triangles;
         return mesh;
     }
@@ -24,16 +30,17 @@ public class GeometryBaseShape : MonoBehaviour, IGeometryShapePart
     [SerializeField]
     private ShapeDirection shapeDirection;
     [SerializeField]
-    private Vector3[] vertices;
+    private Vector2[] vertices;
     [SerializeField]
     private int[] triangles;
 
     public ShapeDirection ShapeDirection => shapeDirection;
-    public Vector3[] Vertices => vertices;
+    public Vector2[] Vertices => vertices;
     public int[] Triangles => triangles;
 
-
     Mesh m_mesh = null;
+    MeshFilter m_meshFilter = null;
+    MeshCollider m_meshCollider = null;
 
     void Awake()
     {
@@ -42,19 +49,24 @@ public class GeometryBaseShape : MonoBehaviour, IGeometryShapePart
             Destroy(m_mesh);
         }
         m_mesh = CreateMesh(vertices, triangles);
-        GetComponent<MeshFilter>().mesh = m_mesh;
+
+        m_meshFilter = GetComponent<MeshFilter>();
+        m_meshCollider = GetComponent<MeshCollider>();
+
+        m_meshFilter.mesh = m_mesh;
+        if (m_meshCollider)
+            m_meshCollider.sharedMesh = m_mesh;
     }
 
     public void MountShape(IGeometryShapePart shapePart, Vector3 localPosition, Quaternion localLookDirection)
     {
-        Vector3[] otherVertices = shapePart.Vertices;
+        Vector2[] otherVertices = shapePart.Vertices;
         int[] otherTriangles = shapePart.Triangles;
 
-        Vector3[] newVertices = new Vector3[vertices.Length + otherVertices.Length];
+        Vector2[] newVertices = new Vector2[vertices.Length + otherVertices.Length];
         vertices.CopyTo(newVertices, 0);
         for (int i = 0; i < otherVertices.Length; i++)
         {
-            // newVertices[vertices.Length + i] = otherShape.transform.InverseTransformPoint(otherShape.transform.TransformPoint(otherVertices[i]) + localPosition);
             newVertices[vertices.Length + i] = localLookDirection * otherVertices[i] + localPosition;
         }
 
@@ -72,7 +84,9 @@ public class GeometryBaseShape : MonoBehaviour, IGeometryShapePart
         vertices = newVertices;
         triangles = newTriangles;
         m_mesh = CreateMesh(newVertices, newTriangles);
-        GetComponent<MeshFilter>().mesh = m_mesh;
+        m_meshFilter.mesh = m_mesh;
+        if (m_meshCollider)
+            m_meshCollider.sharedMesh = m_mesh;
     }
 
 #if UNITY_EDITOR
