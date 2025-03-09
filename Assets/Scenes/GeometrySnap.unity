@@ -128,6 +128,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1236526712}
+  - component: {fileID: 1236526715}
   - component: {fileID: 1236526713}
   - component: {fileID: 1236526714}
   m_Layer: 0
@@ -165,7 +166,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f5ac0698a853a4a98851bf29a6ffc18e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  baseSnapPart: {fileID: 2111606329}
+  snapController: {fileID: 1236526715}
   rotateSpeed: 240
   moveSpeed: 5
 --- !u!50 &1236526714
@@ -195,6 +196,42 @@ Rigidbody2D:
   m_SleepingMode: 1
   m_CollisionDetection: 1
   m_Constraints: 4
+--- !u!114 &1236526715
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1236526711}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a1f5af3a1256e4f60a07ad2d60e17ac3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  attractForceCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0.29975036
+      value: 0.99954224
+      inSlope: -6.098322
+      outSlope: -6.098322
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0.025552027
+    - serializedVersion: 3
+      time: 0.7424285
+      value: 0.038621496
+      inSlope: 0.046538282
+      outSlope: 0.046538282
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.10128143
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
 --- !u!1 &1477085393
 GameObject:
   m_ObjectHideFlags: 0
@@ -399,7 +436,7 @@ MonoBehaviour:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
-  rigidbody2D: {fileID: 0}
+  Rigidbody2D: {fileID: 0}
 --- !u!4 &1477085400
 Transform:
   m_ObjectHideFlags: 0
@@ -932,7 +969,7 @@ MonoBehaviour:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
-  rigidbody2D: {fileID: 0}
+  Rigidbody2D: {fileID: 2103352177}
 --- !u!1 &2111606322
 GameObject:
   m_ObjectHideFlags: 0
@@ -1157,7 +1194,7 @@ MonoBehaviour:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
-  rigidbody2D: {fileID: 1236526714}
+  Rigidbody2D: {fileID: 1236526714}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0

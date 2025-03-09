@@ -4,7 +4,7 @@ using UnityEngine.InputSystem;
 public class GeometryPlayerControl : MonoBehaviour
 {
     [SerializeField]
-    private SnapPart baseSnapPart;
+    private SnapController snapController;
 
     [SerializeField]
     private float rotateSpeed = 1.0f;
@@ -39,12 +39,11 @@ public class GeometryPlayerControl : MonoBehaviour
 
     void OnAttackPerfermed(InputAction.CallbackContext context)
     {
-        baseSnapPart.AttractOtherParts();
+        snapController.StartAttractingOtherParts();
     }
 
     void OnAttackCanceled(InputAction.CallbackContext context)
     {
-        Debug.Log("OnAttackCanceled");
-        baseSnapPart.StopAttracting();
+        snapController.StopAttracting();
     }
 }

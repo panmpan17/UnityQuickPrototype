@@ -1,11 +1,34 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public enum SnapPointState
+
+public class SnapPart : MonoBehaviour
 {
-    Free,
-    Attracting,
-    Snapped,
+    [SerializeField]
+    private SnapePointSetting[] m_snapPoints;
+    public SnapePointSetting[] SnapSettings => m_snapPoints;
+    [SerializeField]
+    private AnimationCurve attractForceCurve;
+
+    public SnapController SnapController { get; set; }
+
+    [SerializeField]
+    private Rigidbody2D m_rigidbody2D;
+    public Rigidbody2D Rigidbody2D {
+        get {
+            if (!m_rigidbody2D)
+                m_rigidbody2D = GetComponent<Rigidbody2D>();
+            return m_rigidbody2D;
+        }
+    }
+
+    private bool m_isAttracting = false;
+
+    void Awake()
+    {
+        if (!m_rigidbody2D)
+            m_rigidbody2D = GetComponent<Rigidbody2D>();
+    }
 }
 
 [System.Serializable]
@@ -17,182 +40,4 @@ public struct SnapePointSetting
     public float AttractStrength;
     public int Indetifier;
     public bool IsSlot;
-
-    [System.NonSerialized]
-    public SnapPart SnappedPart;
-    [System.NonSerialized]
-    public int SnappedPartIndex;
-    [System.NonSerialized]
-    public SnapPointState State;
-    [System.NonSerialized]
-    public bool IsParent;
-}
-
-public class SnapPart : MonoBehaviour
-{
-    [SerializeField]
-    private SnapePointSetting[] m_snapPoints;
-    [SerializeField]
-    private AnimationCurve attractForceCurve;
-
-    [SerializeField]
-    private new Rigidbody2D rigidbody2D;
-
-
-    private bool m_isAttracting = false;
-
-    void Awake()
-    {
-        if (rigidbody2D == null)
-            rigidbody2D = GetComponent<Rigidbody2D>();
-    }
-
-    public void AttractOtherParts()
-    {
-        m_isAttracting = ScanAvalibleSnapPartToAttract();
-    }
-
-    bool ScanAvalibleSnapPartToAttract()
-    {
-        bool canAttract = false;
-        for (int i = 0; i < m_snapPoints.Length; i++)
-        {
-            if (m_snapPoints[i].State == SnapPointState.Snapped)
-            {
-                if (m_snapPoints[i].IsParent)
-                {
-                    m_snapPoints[i].SnappedPart.AttractOtherParts();
-                    m_snapPoints[i].SnappedPart.ScanAvalibleSnapPartToAttract();
-                }
-                continue;
-            }
-
-            m_snapPoints[i].State = SnapPointState.Free;
-            m_snapPoints[i].SnappedPart = null;
-
-            Vector3 origin = transform.TransformPoint(m_snapPoints[i].Position);
-            RaycastHit2D[] hits = Physics2D.RaycastAll(origin, m_snapPoints[i].LookDirection, m_snapPoints[i].AttractDistance);
-            for (int j = 0; j < hits.Length; j++)
-            {
-                SnapPart snapPart = hits[j].collider.GetComponent<SnapPart>();
-                if (snapPart == null || snapPart == this)
-                {
-                    continue;
-                }
-
-                bool isSnapped = false;
-                for (int k = 0; k < snapPart.m_snapPoints.Length; k++)
-                {
-                    if (snapPart.m_snapPoints[k].State == SnapPointState.Snapped)
-                    {
-                        continue;
-                    }
-
-
-                    m_snapPoints[i].State = SnapPointState.Attracting;
-                    m_snapPoints[i].SnappedPart = snapPart;
-                    m_snapPoints[i].SnappedPartIndex = k;
-                    isSnapped = true;
-                    canAttract = true;
-                    break;
-                }
-
-                if (isSnapped)
-                {
-                    break;
-                }
-            }
-        }
-        return canAttract;
-    }
-
-    public void StopAttracting()
-    {
-        if (m_isAttracting)
-        {
-            for (int i = 0; i < m_snapPoints.Length; i++)
-            {
-                if (m_snapPoints[i].State == SnapPointState.Attracting)
-                {
-                    m_snapPoints[i].SnappedPart.m_snapPoints[m_snapPoints[i].SnappedPartIndex].State = SnapPointState.Free;
-                    m_snapPoints[i].SnappedPart.m_snapPoints[m_snapPoints[i].SnappedPartIndex].SnappedPart = null;
-
-                    m_snapPoints[i].State = SnapPointState.Free;
-                    m_snapPoints[i].SnappedPart = null;
-                    m_snapPoints[i].SnappedPartIndex = -1;
-                }
-            }
-            m_isAttracting = false;
-        }
-    }
-
-    void FixedUpdate()
-    {
-        if (!m_isAttracting)
-        {
-            return;
-        }
-
-        for (int i = 0; i < m_snapPoints.Length; i++)
-        {
-            if (m_snapPoints[i].State != SnapPointState.Attracting)
-            {
-                continue;
-            }
-
-            if (m_snapPoints[i].SnappedPart == null)
-            {
-                m_snapPoints[i].State = SnapPointState.Free;
-                continue;
-            }
-
-            Vector3 delta = transform.position - m_snapPoints[i].SnappedPart.transform.position;
-            float distance = delta.magnitude;
-            delta /= distance;
-            float force = attractForceCurve.Evaluate(distance / m_snapPoints[i].AttractDistance) * m_snapPoints[i].AttractStrength;
-
-            m_snapPoints[i].SnappedPart.rigidbody2D.linearVelocity = delta * force;
-        }
-    }
-
-    void OnCollisionEnter2D(Collision2D collision2D)
-    {
-        SnapPart snapPart = collision2D.collider.GetComponent<SnapPart>();
-        if (snapPart == null)
-        {
-            return;
-        }
-
-        for (int i = 0; i < m_snapPoints.Length; i++)
-        {
-            if (m_snapPoints[i].State != SnapPointState.Attracting)
-            {
-                continue;
-            }
-
-            if (m_snapPoints[i].SnappedPart == snapPart)
-            {
-                SnapWith(i, snapPart);
-                break;
-            }
-        }
-    }
-
-    void SnapWith(int snapPointIndex, SnapPart snapPart)
-    {
-        m_snapPoints[snapPointIndex].State = SnapPointState.Snapped;
-        m_snapPoints[snapPointIndex].IsParent = true;
-
-        int otherSnapPointIndex = snapPart.m_snapPoints[snapPointIndex].SnappedPartIndex;
-        snapPart.m_snapPoints[otherSnapPointIndex].State = SnapPointState.Snapped;
-        snapPart.m_snapPoints[otherSnapPointIndex].SnappedPart = this;
-        snapPart.m_snapPoints[otherSnapPointIndex].IsParent = false;
-
-        snapPart.transform.SetParent(transform.parent);
-        Vector3 thisSnapPoint = m_snapPoints[snapPointIndex].Position;
-        Vector3 otherSnapPoint = snapPart.m_snapPoints[m_snapPoints[snapPointIndex].SnappedPartIndex].Position;
-        Vector3 snapPosition = transform.TransformPoint(thisSnapPoint - otherSnapPoint);
-        snapPart.transform.SetPositionAndRotation(snapPosition, transform.rotation);
-        Destroy(snapPart.rigidbody2D);
-    }
 }
