@@ -24,6 +24,8 @@ public struct SnapePointSetting
     public int SnappedPartIndex;
     [System.NonSerialized]
     public SnapPointState State;
+    [System.NonSerialized]
+    public bool IsParent;
 }
 
 public class SnapPart : MonoBehaviour
@@ -47,16 +49,21 @@ public class SnapPart : MonoBehaviour
 
     public void AttractOtherParts()
     {
-        ScanAvalibleSnapPartToAttract();
-        m_isAttracting = true;
+        m_isAttracting = ScanAvalibleSnapPartToAttract();
     }
 
-    void ScanAvalibleSnapPartToAttract()
+    bool ScanAvalibleSnapPartToAttract()
     {
+        bool canAttract = false;
         for (int i = 0; i < m_snapPoints.Length; i++)
         {
             if (m_snapPoints[i].State == SnapPointState.Snapped)
             {
+                if (m_snapPoints[i].IsParent)
+                {
+                    m_snapPoints[i].SnappedPart.AttractOtherParts();
+                    m_snapPoints[i].SnappedPart.ScanAvalibleSnapPartToAttract();
+                }
                 continue;
             }
 
@@ -86,6 +93,7 @@ public class SnapPart : MonoBehaviour
                     m_snapPoints[i].SnappedPart = snapPart;
                     m_snapPoints[i].SnappedPartIndex = k;
                     isSnapped = true;
+                    canAttract = true;
                     break;
                 }
 
@@ -95,23 +103,27 @@ public class SnapPart : MonoBehaviour
                 }
             }
         }
+        return canAttract;
     }
 
     public void StopAttracting()
     {
-        for (int i = 0; i < m_snapPoints.Length; i++)
+        if (m_isAttracting)
         {
-            if (m_snapPoints[i].State == SnapPointState.Attracting)
+            for (int i = 0; i < m_snapPoints.Length; i++)
             {
-                m_snapPoints[i].SnappedPart.m_snapPoints[m_snapPoints[i].SnappedPartIndex].State = SnapPointState.Free;
-                m_snapPoints[i].SnappedPart.m_snapPoints[m_snapPoints[i].SnappedPartIndex].SnappedPart = null;
+                if (m_snapPoints[i].State == SnapPointState.Attracting)
+                {
+                    m_snapPoints[i].SnappedPart.m_snapPoints[m_snapPoints[i].SnappedPartIndex].State = SnapPointState.Free;
+                    m_snapPoints[i].SnappedPart.m_snapPoints[m_snapPoints[i].SnappedPartIndex].SnappedPart = null;
 
-                m_snapPoints[i].State = SnapPointState.Free;
-                m_snapPoints[i].SnappedPart = null;
-                m_snapPoints[i].SnappedPartIndex = -1;
+                    m_snapPoints[i].State = SnapPointState.Free;
+                    m_snapPoints[i].SnappedPart = null;
+                    m_snapPoints[i].SnappedPartIndex = -1;
+                }
             }
+            m_isAttracting = false;
         }
-        m_isAttracting = false;
     }
 
     void FixedUpdate()
@@ -169,9 +181,12 @@ public class SnapPart : MonoBehaviour
     void SnapWith(int snapPointIndex, SnapPart snapPart)
     {
         m_snapPoints[snapPointIndex].State = SnapPointState.Snapped;
+        m_snapPoints[snapPointIndex].IsParent = true;
 
-        snapPart.m_snapPoints[m_snapPoints[snapPointIndex].SnappedPartIndex].State = SnapPointState.Snapped;
-        snapPart.m_snapPoints[m_snapPoints[snapPointIndex].SnappedPartIndex].SnappedPart = this;
+        int otherSnapPointIndex = snapPart.m_snapPoints[snapPointIndex].SnappedPartIndex;
+        snapPart.m_snapPoints[otherSnapPointIndex].State = SnapPointState.Snapped;
+        snapPart.m_snapPoints[otherSnapPointIndex].SnappedPart = this;
+        snapPart.m_snapPoints[otherSnapPointIndex].IsParent = false;
 
         snapPart.transform.SetParent(transform.parent);
         Vector3 thisSnapPoint = m_snapPoints[snapPointIndex].Position;

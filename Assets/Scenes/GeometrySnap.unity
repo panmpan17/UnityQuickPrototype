@@ -409,7 +409,7 @@ Transform:
   m_GameObject: {fileID: 1477085393}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -1.23, y: 3.98, z: 0}
+  m_LocalPosition: {x: 5.37, y: 3.16, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -779,8 +779,11 @@ MonoBehaviour:
   - {x: -1, y: -0.5}
   - {x: -1, y: -1}
   - {x: 1, y: -1}
-  triangles: 000000000100000002000000000000000200000003000000030000000400000005000000030000000500000006000000000000000300000006000000
-  showGizmos: 0
+  - {x: 1, y: -0.5}
+  - {x: 2, y: 0}
+  - {x: 1, y: 0.5}
+  triangles: 000000000100000002000000000000000200000003000000030000000400000005000000030000000500000006000000000000000300000006000000070000000800000009000000
+  showGizmos: 2
 --- !u!4 &2103352175
 Transform:
   m_ObjectHideFlags: 0
@@ -842,7 +845,10 @@ PolygonCollider2D:
   m_AutoTiling: 0
   m_Points:
     m_Paths:
-    - - {x: 1, y: 1}
+    - - {x: 1, y: -0.5}
+      - {x: 2, y: 0}
+      - {x: 1, y: 0.5}
+      - {x: 1, y: 1}
       - {x: -1, y: 1}
       - {x: -1, y: 0.5}
       - {x: 0, y: 0}
@@ -896,9 +902,33 @@ MonoBehaviour:
     AttractStrength: 0
     Indetifier: 0
     IsSlot: 1
+  - Position: {x: 1, y: 0}
+    LookDirection: {x: 1, y: 0}
+    AttractDistance: 8
+    AttractStrength: 40
+    Indetifier: 0
+    IsSlot: 0
   attractForceCurve:
     serializedVersion: 2
-    m_Curve: []
+    m_Curve:
+    - serializedVersion: 3
+      time: 0.29975036
+      value: 0.99954224
+      inSlope: -6.098322
+      outSlope: -6.098322
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0.025552027
+    - serializedVersion: 3
+      time: 0.7424285
+      value: 0.038621496
+      inSlope: 0.046538282
+      outSlope: 0.046538282
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.10128143
+      outWeight: 0
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
