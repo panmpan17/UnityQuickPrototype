@@ -135,10 +135,10 @@ public class GeometryBaseShape : MonoBehaviour, IGeometryShapePart
         }
 
         Gizmos.color = Color.red;
-        for (int i = 0; i < vertices.Length; i++)
-        {
-            Gizmos.DrawSphere(transform.TransformPoint(vertices[i]), 0.1f);
-        }
+        // for (int i = 0; i < vertices.Length; i++)
+        // {
+        //     Gizmos.DrawSphere(transform.TransformPoint(vertices[i]), 0.1f);
+        // }
 
         for (int i = 0; i < triangles.Length; i += 3)
         {

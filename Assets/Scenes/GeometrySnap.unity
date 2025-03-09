@@ -410,7 +410,7 @@ MonoBehaviour:
   - {x: -1, y: -1}
   - {x: 1, y: -1}
   triangles: 000000000100000002000000000000000200000003000000030000000400000005000000030000000500000006000000000000000300000006000000
-  showGizmos: 0
+  showGizmos: 1
 --- !u!114 &1477085399
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -436,7 +436,7 @@ MonoBehaviour:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
-  Rigidbody2D: {fileID: 0}
+  m_rigidbody2D: {fileID: 0}
 --- !u!4 &1477085400
 Transform:
   m_ObjectHideFlags: 0
@@ -645,7 +645,7 @@ Camera:
   far clip plane: 1000
   field of view: 60
   orthographic: 1
-  orthographic size: 5
+  orthographic size: 10
   m_Depth: -1
   m_CullingMask:
     serializedVersion: 2
@@ -816,11 +816,11 @@ MonoBehaviour:
   - {x: -1, y: -0.5}
   - {x: -1, y: -1}
   - {x: 1, y: -1}
-  - {x: 1, y: -0.5}
-  - {x: 2, y: 0}
-  - {x: 1, y: 0.5}
+  - {x: 0.5, y: -1}
+  - {x: -0.5, y: -1}
+  - {x: 0, y: -2}
   triangles: 000000000100000002000000000000000200000003000000030000000400000005000000030000000500000006000000000000000300000006000000070000000800000009000000
-  showGizmos: 2
+  showGizmos: 1
 --- !u!4 &2103352175
 Transform:
   m_ObjectHideFlags: 0
@@ -882,15 +882,15 @@ PolygonCollider2D:
   m_AutoTiling: 0
   m_Points:
     m_Paths:
-    - - {x: 1, y: -0.5}
-      - {x: 2, y: 0}
-      - {x: 1, y: 0.5}
-      - {x: 1, y: 1}
+    - - {x: 1, y: 1}
       - {x: -1, y: 1}
       - {x: -1, y: 0.5}
       - {x: 0, y: 0}
       - {x: -1, y: -0.5}
       - {x: -1, y: -1}
+      - {x: -0.5, y: -1}
+      - {x: 0, y: -2}
+      - {x: 0.5, y: -1}
       - {x: 1, y: -1}
   m_UseDelaunayMesh: 0
 --- !u!50 &2103352177
@@ -939,8 +939,8 @@ MonoBehaviour:
     AttractStrength: 0
     Indetifier: 0
     IsSlot: 1
-  - Position: {x: 1, y: 0}
-    LookDirection: {x: 1, y: 0}
+  - Position: {x: 0, y: -1}
+    LookDirection: {x: 0, y: -1}
     AttractDistance: 8
     AttractStrength: 40
     Indetifier: 0
@@ -969,7 +969,7 @@ MonoBehaviour:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
-  Rigidbody2D: {fileID: 2103352177}
+  m_rigidbody2D: {fileID: 0}
 --- !u!1 &2111606322
 GameObject:
   m_ObjectHideFlags: 0
@@ -1194,7 +1194,7 @@ MonoBehaviour:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
-  Rigidbody2D: {fileID: 1236526714}
+  m_rigidbody2D: {fileID: 0}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0

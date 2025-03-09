@@ -58,7 +58,7 @@ public class SnapController : MonoBehaviour
             m_snapPoints[i].SnappedPart = null;
 
             Vector3 origin = transform.TransformPoint(m_snapPoints[i].Position);
-            RaycastHit2D[] hits = Physics2D.RaycastAll(origin, m_snapPoints[i].LookDirection, m_snapPoints[i].AttractDistance);
+            RaycastHit2D[] hits = Physics2D.RaycastAll(origin, transform.TransformDirection(m_snapPoints[i].LookDirection), m_snapPoints[i].AttractDistance);
             for (int j = 0; j < hits.Length; j++)
             {
                 SnapPart snapPart = hits[j].collider.GetComponent<SnapPart>();
@@ -94,10 +94,17 @@ public class SnapController : MonoBehaviour
 
         // Set parent and position
         snapPart.transform.SetParent(transform);
+
+        Vector2 direction = transform.TransformDirection(m_snapPoints[snapPointIndex].LookDirection);
+        Quaternion rotation = Quaternion.Euler(0, 0, Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg);
+
         Vector3 thisSnapPoint = m_snapPoints[snapPointIndex].Position;
         Vector3 otherSnapPoint = snapPart.SnapSettings[m_snapPoints[snapPointIndex].SnappedPartIndex].Position;
-        Vector3 snapPosition = transform.TransformPoint(thisSnapPoint - otherSnapPoint);
-        snapPart.transform.SetPositionAndRotation(snapPosition, transform.rotation);
+        Quaternion rotationDiff = Quaternion.Inverse(rotation) * snapPart.transform.rotation;
+
+        Vector3 snapPosition = transform.TransformPoint(thisSnapPoint) - (rotation * otherSnapPoint);
+
+        snapPart.transform.SetPositionAndRotation(snapPosition, rotation);
         Destroy(snapPart.Rigidbody2D);
 
         // Add snap part
@@ -201,6 +208,17 @@ public class SnapController : MonoBehaviour
                 SnapInfoSnapWithPart(i, snapPart);
                 break;
             }
+        }
+    }
+
+    void OnDrawGizmos()
+    {
+        Gizmos.color = Color.yellow;
+        for (int i = 0; i < m_snapPoints.Count; i++)
+        {
+            Vector3 point = transform.TransformPoint(m_snapPoints[i].Position);
+            Gizmos.DrawSphere(point, 0.1f);
+            Gizmos.DrawLine(point, point + transform.TransformDirection(m_snapPoints[i].LookDirection));
         }
     }
 }

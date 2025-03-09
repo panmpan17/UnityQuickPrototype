@@ -37,17 +37,17 @@ public class CombinedGeometryShape : MonoBehaviour
         }
     }
 
-    void OnDrawGizmos()
-    {
-        if (baseShape == null || addShape == null)
-        {
-            return;
-        }
+    // void OnDrawGizmos()
+    // {
+    //     if (baseShape == null || addShape == null)
+    //     {
+    //         return;
+    //     }
 
-        Gizmos.color = Color.red;
-        for (int i = 0; i < mountingPoints.Length; i++)
-        {
-            Gizmos.DrawSphere(baseShape.transform.TransformPoint(mountingPoints[i].localPosition), 0.1f);
-        }
-    }
+    //     Gizmos.color = Color.red;
+    //     for (int i = 0; i < mountingPoints.Length; i++)
+    //     {
+    //         Gizmos.DrawSphere(baseShape.transform.TransformPoint(mountingPoints[i].localPosition), 0.1f);
+    //     }
+    // }
 }
