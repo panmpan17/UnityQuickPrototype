@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UIElements;
 
@@ -18,12 +19,15 @@ public class GeometryBaseShape : MonoBehaviour, IGeometryShapePart
         Mesh mesh = new Mesh();
 
         Vector3[] vertices3D = new Vector3[vertices.Length];
+        // Color[] colors = new Color[vertices.Length];
         for (int i = 0; i < vertices.Length; i++)
         {
             vertices3D[i] = new Vector3(vertices[i].x, vertices[i].y, 0);
+            // colors[i] = new Color(Random.Range(0.0f, 1.0f), Random.Range(0.0f, 1.0f), Random.Range(0.0f, 1.0f), 1.0f);
         }
         mesh.vertices = vertices3D;
         mesh.triangles = triangles;
+        // mesh.colors = colors;
         return mesh;
     }
 
@@ -33,6 +37,13 @@ public class GeometryBaseShape : MonoBehaviour, IGeometryShapePart
     private Vector2[] vertices;
     [SerializeField]
     private int[] triangles;
+
+    [SerializeField]
+    private PolygonCollider2D polygonCollider;
+
+    [SerializeField]
+    private bool randomColors;
+    public Color Color { get; private set; }
 
     public ShapeDirection ShapeDirection => shapeDirection;
     public Vector2[] Vertices => vertices;
@@ -56,12 +67,24 @@ public class GeometryBaseShape : MonoBehaviour, IGeometryShapePart
         m_meshFilter.mesh = m_mesh;
         if (m_meshCollider)
             m_meshCollider.sharedMesh = m_mesh;
+
+        if (polygonCollider)
+            polygonCollider.points = vertices;
+        
+        if (randomColors)
+        {
+            MeshRenderer meshRenderer = GetComponent<MeshRenderer>();
+            Color = new Color(Random.Range(0.0f, 1.0f), Random.Range(0.0f, 1.0f), Random.Range(0.0f, 1.0f), 1.0f);
+            meshRenderer.material.color = Color;
+        }
     }
 
     public void MountShape(IGeometryShapePart shapePart, Vector3 localPosition, Quaternion localLookDirection)
     {
         Vector2[] otherVertices = shapePart.Vertices;
         int[] otherTriangles = shapePart.Triangles;
+
+        // List<Vector2> newPolygonPoints = new List<Vector2>(polygonCollider.points);
 
         Vector2[] newVertices = new Vector2[vertices.Length + otherVertices.Length];
         vertices.CopyTo(newVertices, 0);
@@ -87,6 +110,8 @@ public class GeometryBaseShape : MonoBehaviour, IGeometryShapePart
         m_meshFilter.mesh = m_mesh;
         if (m_meshCollider)
             m_meshCollider.sharedMesh = m_mesh;
+        
+        // polygonCollider.points = newPolygonPoints.ToArray();
     }
 
 #if UNITY_EDITOR

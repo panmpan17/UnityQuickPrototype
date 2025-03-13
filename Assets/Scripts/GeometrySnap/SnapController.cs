@@ -1,10 +1,22 @@
 using System.Collections.Generic;
 using UnityEngine;
+using Unity.Cinemachine;
 
 public class SnapController : MonoBehaviour
 {
     [SerializeField]
     private AnimationCurve attractForceCurve;
+    [SerializeField]
+    private AudioSource audioSource;
+    [SerializeField]
+    private AudioClip snapSound;
+    [SerializeField]
+    private CinemachineImpulseSource snapImpulse;
+    [SerializeField]
+    private float snapImpulseForce;
+    [SerializeField]
+    private ParticleSystem snapParticle;
+    private ParticleSystem.MainModule snapParticleMain;
 
     private bool m_isAttracting = false;
 
@@ -19,6 +31,8 @@ public class SnapController : MonoBehaviour
         {
             AddSnapPartAndSnapPointInfos(parts[i]);
         }
+
+        snapParticleMain = snapParticle.main;
     }
 
 #region  Adding and removing Snap Parts, snap point setting
@@ -153,23 +167,21 @@ public class SnapController : MonoBehaviour
         int count = m_snapPoints.Count;
         for (int i = 0; i < count; i++)
         {
-            if (m_snapPoints[i].State != SnapPointState.Attracting)
+            SnapPointInfo snapPoint = m_snapPoints[i];
+            if (snapPoint.State != SnapPointState.Attracting)
             {
                 continue;
             }
 
-            if (m_snapPoints[i].SnappedPart == null)
+            if (snapPoint.SnappedPart == null)
             {
-                m_snapPoints[i].State = SnapPointState.Free;
+                snapPoint.State = SnapPointState.Free;
                 continue;
             }
 
-            Vector3 delta = transform.position - m_snapPoints[i].SnappedPart.transform.position;
-            float distance = delta.magnitude;
-            delta /= distance;
-            float force = attractForceCurve.Evaluate(distance / m_snapPoints[i].AttractDistance) * m_snapPoints[i].AttractStrength;
-
-            m_snapPoints[i].SnappedPart.Rigidbody2D.linearVelocity = delta * force;
+            // Michael TODO: improve this function call
+            snapPoint.SnappedPart.PullTowards(transform.TransformPoint(snapPoint.Position), snapPoint.SnappedPartIndex,
+                                              snapPoint.AttractStrength, snapPoint.AttractDistance, attractForceCurve);
         }
     }
 #endregion
@@ -183,6 +195,15 @@ public class SnapController : MonoBehaviour
 
     public void StopAttracting()
     {
+        for (int i = 0; i < m_snapPoints.Count; i++)
+        {
+            if (m_snapPoints[i].State == SnapPointState.Attracting)
+            {
+                m_snapPoints[i].State = SnapPointState.Free;
+                m_snapPoints[i].SnappedPart.StopAttracting();
+                m_snapPoints[i].SnappedPart = null;
+            }
+        }
         m_isAttracting = false;
     }
 #endregion
@@ -206,6 +227,19 @@ public class SnapController : MonoBehaviour
             if (m_snapPoints[i].SnappedPart == snapPart)
             {
                 SnapInfoSnapWithPart(i, snapPart);
+                audioSource.PlayOneShot(snapSound);
+
+                Vector3 snapedPoint = transform.TransformPoint(m_snapPoints[i].Position);
+                Vector3 delta = (snapedPoint - snapPart.transform.position).normalized;
+                snapImpulse.GenerateImpulse(new Vector3(delta.x * snapImpulseForce + Random.Range(-snapImpulseForce, snapImpulseForce),
+                                                        delta.y * snapImpulseForce + Random.Range(-snapImpulseForce, snapImpulseForce),
+                                                        0));
+
+                var shap = snapPart.GetComponent<GeometryBaseShape>();
+                snapParticleMain.startColor = shap ? shap.Color : Color.white;
+                snapParticle.transform.position = snapedPoint;
+                snapParticle.transform.rotation = Quaternion.Euler(0, 0, Mathf.Atan2(delta.y, delta.x) * Mathf.Rad2Deg);
+                snapParticle.Play();
                 break;
             }
         }
