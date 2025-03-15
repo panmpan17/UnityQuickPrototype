@@ -1,4 +1,7 @@
 using System.Collections.Generic;
+using System.Linq;
+using MPack;
+using Unity.VisualScripting.FullSerializer;
 using UnityEngine;
 using UnityEngine.UIElements;
 
@@ -14,20 +17,32 @@ public enum GizmosDrawType
 [RequireComponent(typeof(MeshRenderer))]
 public class GeometryBaseShape : MonoBehaviour, IGeometryShapePart
 {
-    static Mesh CreateMesh(Vector2[] vertices, int[] triangles)
+    static Mesh CreateMesh(ref Vector2[] vertices, ref int[] triangles)
     {
         Mesh mesh = new Mesh();
 
         Vector3[] vertices3D = new Vector3[vertices.Length];
-        // Color[] colors = new Color[vertices.Length];
         for (int i = 0; i < vertices.Length; i++)
         {
             vertices3D[i] = new Vector3(vertices[i].x, vertices[i].y, 0);
-            // colors[i] = new Color(Random.Range(0.0f, 1.0f), Random.Range(0.0f, 1.0f), Random.Range(0.0f, 1.0f), 1.0f);
         }
         mesh.vertices = vertices3D;
         mesh.triangles = triangles;
-        // mesh.colors = colors;
+        return mesh;
+    }
+
+    static Mesh CreateMesh(ref Vector2[] vertices, ref int[] triangles, ref Color[] colors)
+    {
+        Mesh mesh = new Mesh();
+
+        Vector3[] vertices3D = new Vector3[vertices.Length];
+        for (int i = 0; i < vertices.Length; i++)
+        {
+            vertices3D[i] = new Vector3(vertices[i].x, vertices[i].y, 0);
+        }
+        mesh.vertices = vertices3D;
+        mesh.triangles = triangles;
+        mesh.colors = colors;
         return mesh;
     }
 
@@ -41,9 +56,23 @@ public class GeometryBaseShape : MonoBehaviour, IGeometryShapePart
     [SerializeField]
     private PolygonCollider2D polygonCollider;
 
+    [Header("Outline")]
     [SerializeField]
-    private bool randomColors;
-    public Color Color { get; private set; }
+    private float hue = 0.5f;
+    [SerializeField]
+    private bool randomHue = false;
+    [SerializeField]
+    private RangeStruct randomHueRange;
+    [SerializeField]
+    private float surfaceIntensity = 1f;
+    [SerializeField]
+    private float outlineIntensity = 0.5f;
+    [SerializeField]
+    private bool liveUpdate = false;
+    private float m_oldHue, m_oldSurfaceIntensity, m_oldOutlineIntensity;
+
+    [SerializeField]
+    private ValueWithEnable<float> outlineWidth;
 
     public ShapeDirection ShapeDirection => shapeDirection;
     public Vector2[] Vertices => vertices;
@@ -51,7 +80,6 @@ public class GeometryBaseShape : MonoBehaviour, IGeometryShapePart
 
     Mesh m_mesh = null;
     MeshFilter m_meshFilter = null;
-    MeshCollider m_meshCollider = null;
 
     void Awake()
     {
@@ -59,32 +87,31 @@ public class GeometryBaseShape : MonoBehaviour, IGeometryShapePart
         {
             Destroy(m_mesh);
         }
-        m_mesh = CreateMesh(vertices, triangles);
 
         m_meshFilter = GetComponent<MeshFilter>();
-        m_meshCollider = GetComponent<MeshCollider>();
 
-        m_meshFilter.mesh = m_mesh;
-        if (m_meshCollider)
-            m_meshCollider.sharedMesh = m_mesh;
-
-        if (polygonCollider)
-            polygonCollider.points = vertices;
-        
-        if (randomColors)
+        if (randomHue)
         {
-            MeshRenderer meshRenderer = GetComponent<MeshRenderer>();
-            Color = new Color(Random.Range(0.0f, 1.0f), Random.Range(0.0f, 1.0f), Random.Range(0.0f, 1.0f), 1.0f);
-            meshRenderer.material.color = Color;
+            hue = Random.Range(randomHueRange.Min, randomHueRange.Max);
+        }
+
+        if (outlineWidth.Enable)
+        {
+            GenerateOutline();
+        }
+        else
+        {
+            m_mesh = CreateMesh(ref vertices, ref triangles);
+            m_meshFilter.mesh = m_mesh;
         }
     }
 
     public void MountShape(IGeometryShapePart shapePart, Vector3 localPosition, Quaternion localLookDirection)
     {
+        return;
+
         Vector2[] otherVertices = shapePart.Vertices;
         int[] otherTriangles = shapePart.Triangles;
-
-        // List<Vector2> newPolygonPoints = new List<Vector2>(polygonCollider.points);
 
         Vector2[] newVertices = new Vector2[vertices.Length + otherVertices.Length];
         vertices.CopyTo(newVertices, 0);
@@ -106,13 +133,89 @@ public class GeometryBaseShape : MonoBehaviour, IGeometryShapePart
         }
         vertices = newVertices;
         triangles = newTriangles;
-        m_mesh = CreateMesh(newVertices, newTriangles);
+        m_mesh = CreateMesh(ref newVertices, ref newTriangles);
         m_meshFilter.mesh = m_mesh;
-        if (m_meshCollider)
-            m_meshCollider.sharedMesh = m_mesh;
-        
-        // polygonCollider.points = newPolygonPoints.ToArray();
     }
+
+
+    void GenerateOutline()
+    {
+        Vector2[] edgePoints = polygonCollider.GetPath(0);
+        Vector2[] edgeInwardPoints = PolygonMath.CalculateVerticesInwardExpand(ref edgePoints, outlineWidth.Value);
+
+        int edgePointCount = edgePoints.Length;
+        int verticesCount = vertices.Length;
+        Vector2[] newVertices = new Vector2[verticesCount + edgePointCount + edgePointCount];
+        Vector2[] uv = new Vector2[newVertices.Length];
+        for (int i = 0; i < verticesCount; i++)
+        {
+            newVertices[i] = vertices[i];
+            uv[i] = new Vector2(surfaceIntensity, hue);
+        }
+        for (int i = 0; i < edgePointCount; i++)
+        {
+            newVertices[verticesCount + i] = edgePoints[i];
+            uv[verticesCount + i] = new Vector2(outlineIntensity, hue);
+        }
+        for (int i = 0; i < edgePointCount; i++)
+        {
+            newVertices[verticesCount + edgePointCount + i] = edgeInwardPoints[i];
+            uv[verticesCount + edgePointCount + i] = new Vector2(outlineIntensity, hue);
+        }
+
+        List<int> newTriangles = new List<int>(triangles);
+        for (int i = 0; i < edgePoints.Length; i++)
+        {
+            int a1 = i + verticesCount;
+            int a2 = (i + 1) % edgePointCount + verticesCount;
+            int b1 = a1 + edgePointCount;
+            int b2 = a2 + edgePointCount;
+
+            newTriangles.Add(a1);
+            newTriangles.Add(a2);
+            newTriangles.Add(b1);
+
+            newTriangles.Add(a2);
+            newTriangles.Add(b2);
+            newTriangles.Add(b1);
+        }
+
+        Vector2[] verticesArr = newVertices.ToArray();
+        int[] trianglesArr = newTriangles.ToArray();
+        m_mesh = CreateMesh(ref verticesArr, ref trianglesArr);
+        m_mesh.uv = uv;
+
+        m_meshFilter.mesh = m_mesh;
+    }
+
+
+    void Update()
+    {
+        if (!outlineWidth.Enable || !liveUpdate)
+        {
+            return;
+        }
+
+        if (m_oldHue != hue || m_oldSurfaceIntensity != surfaceIntensity || m_oldOutlineIntensity != outlineIntensity)
+        {
+            m_oldHue = hue;
+            m_oldSurfaceIntensity = surfaceIntensity;
+            m_oldOutlineIntensity = outlineIntensity;
+
+            Vector2[] uv = new Vector2[m_mesh.vertices.Length];
+            for (int i = 0; i < vertices.Length; i++)
+            {
+                uv[i] = new Vector2(surfaceIntensity, hue);
+            }
+            for (int i = vertices.Length; i < uv.Length; i++)
+            {
+                uv[i] = new Vector2(outlineIntensity, hue);
+            }
+            
+            m_mesh.uv = uv;
+        }
+    }
+
 
 #if UNITY_EDITOR
     [ContextMenu("Generate Shape Data Scriptable")]
@@ -178,6 +281,21 @@ public class GeometryBaseShape : MonoBehaviour, IGeometryShapePart
             Gizmos.DrawLine(p1, p2);
             Gizmos.DrawLine(p2, p0);
         }
+    }
+
+    [ContextMenu("Generate Polygon Collider")]
+    void GeneratePolygonCollider()
+    {
+        var polygonCollider = GetComponent<PolygonCollider2D>();
+        if (polygonCollider == null)
+        {
+            return;
+        }
+
+        Vector2[] path = PolygonMath.CalculateOuterEdge(ref vertices, ref triangles);
+        var polyCollider = GetComponent<PolygonCollider2D>();
+        polyCollider.pathCount = 1;
+        polyCollider.SetPath(0, path);
     }
 #endregion
 #endif

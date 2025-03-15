@@ -49,7 +49,7 @@ public partial class @InputScheme: IInputActionCollection2, IDisposable
                     ""name"": ""Attack"",
                     ""type"": ""Button"",
                     ""id"": ""43952c2c-2cfe-4760-99ef-87877f2342ad"",
-                    ""expectedControlType"": ""Button"",
+                    ""expectedControlType"": """",
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": false
@@ -62,6 +62,15 @@ public partial class @InputScheme: IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": true
+                },
+                {
+                    ""name"": ""Shift"",
+                    ""type"": ""Button"",
+                    ""id"": ""c2d5227b-6b5d-4f31-bace-ec5cf2887576"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
                 }
             ],
             ""bindings"": [
@@ -152,6 +161,17 @@ public partial class @InputScheme: IInputActionCollection2, IDisposable
                     ""action"": ""Move"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": true
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""e7fd94d7-dcb6-4d03-839b-fa8e24a2ca37"",
+                    ""path"": ""<Keyboard>/leftShift"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Shift"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
                 }
             ]
         }
@@ -164,6 +184,7 @@ public partial class @InputScheme: IInputActionCollection2, IDisposable
         m_Player_PointerInput = m_Player.FindAction("PointerInput", throwIfNotFound: true);
         m_Player_Attack = m_Player.FindAction("Attack", throwIfNotFound: true);
         m_Player_Move = m_Player.FindAction("Move", throwIfNotFound: true);
+        m_Player_Shift = m_Player.FindAction("Shift", throwIfNotFound: true);
     }
 
     ~@InputScheme()
@@ -234,6 +255,7 @@ public partial class @InputScheme: IInputActionCollection2, IDisposable
     private readonly InputAction m_Player_PointerInput;
     private readonly InputAction m_Player_Attack;
     private readonly InputAction m_Player_Move;
+    private readonly InputAction m_Player_Shift;
     public struct PlayerActions
     {
         private @InputScheme m_Wrapper;
@@ -242,6 +264,7 @@ public partial class @InputScheme: IInputActionCollection2, IDisposable
         public InputAction @PointerInput => m_Wrapper.m_Player_PointerInput;
         public InputAction @Attack => m_Wrapper.m_Player_Attack;
         public InputAction @Move => m_Wrapper.m_Player_Move;
+        public InputAction @Shift => m_Wrapper.m_Player_Shift;
         public InputActionMap Get() { return m_Wrapper.m_Player; }
         public void Enable() { Get().Enable(); }
         public void Disable() { Get().Disable(); }
@@ -263,6 +286,9 @@ public partial class @InputScheme: IInputActionCollection2, IDisposable
             @Move.started += instance.OnMove;
             @Move.performed += instance.OnMove;
             @Move.canceled += instance.OnMove;
+            @Shift.started += instance.OnShift;
+            @Shift.performed += instance.OnShift;
+            @Shift.canceled += instance.OnShift;
         }
 
         private void UnregisterCallbacks(IPlayerActions instance)
@@ -279,6 +305,9 @@ public partial class @InputScheme: IInputActionCollection2, IDisposable
             @Move.started -= instance.OnMove;
             @Move.performed -= instance.OnMove;
             @Move.canceled -= instance.OnMove;
+            @Shift.started -= instance.OnShift;
+            @Shift.performed -= instance.OnShift;
+            @Shift.canceled -= instance.OnShift;
         }
 
         public void RemoveCallbacks(IPlayerActions instance)
@@ -302,5 +331,6 @@ public partial class @InputScheme: IInputActionCollection2, IDisposable
         void OnPointerInput(InputAction.CallbackContext context);
         void OnAttack(InputAction.CallbackContext context);
         void OnMove(InputAction.CallbackContext context);
+        void OnShift(InputAction.CallbackContext context);
     }
 }

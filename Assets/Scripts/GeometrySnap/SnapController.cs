@@ -84,6 +84,11 @@ public class SnapController : MonoBehaviour
                 bool isSnapped = false;
                 for (int k = 0; k < snapPart.SnapSettings.Length; k++)
                 {
+                    if (!snapPart.SnapSettings[k].IsSlot || snapPart.SnapSettings[k].Indetifier != m_snapPoints[i].Setting.Indetifier)
+                    {
+                        continue;
+                    }
+
                     m_snapPoints[i].State = SnapPointState.Attracting;
                     m_snapPoints[i].SnappedPart = snapPart;
                     m_snapPoints[i].SnappedPartIndex = k;
@@ -119,7 +124,10 @@ public class SnapController : MonoBehaviour
         Vector3 snapPosition = transform.TransformPoint(thisSnapPoint) - (rotation * otherSnapPoint);
 
         snapPart.transform.SetPositionAndRotation(snapPosition, rotation);
-        Destroy(snapPart.Rigidbody2D);
+        snapPart.Rigidbody2D.bodyType = RigidbodyType2D.Kinematic;
+        snapPart.Rigidbody2D.linearVelocity = Vector2.zero;
+        snapPart.Rigidbody2D.angularVelocity = 0;
+        // Destroy(snapPart.Rigidbody2D);
 
         // Add snap part
         snapPart.SnapController = this;
@@ -236,7 +244,7 @@ public class SnapController : MonoBehaviour
                                                         0));
 
                 var shap = snapPart.GetComponent<GeometryBaseShape>();
-                snapParticleMain.startColor = shap ? shap.Color : Color.white;
+                snapParticleMain.startColor = Color.white;
                 snapParticle.transform.position = snapedPoint;
                 snapParticle.transform.rotation = Quaternion.Euler(0, 0, Mathf.Atan2(delta.y, delta.x) * Mathf.Rad2Deg);
                 snapParticle.Play();
