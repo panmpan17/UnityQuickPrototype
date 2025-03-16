@@ -20,6 +20,7 @@ public class SnapController : MonoBehaviour
 
     private bool m_isAttracting = false;
 
+    private List<SnapPart> m_originalSnapParts = new List<SnapPart>();
     private List<SnapPart> m_snapParts = new List<SnapPart>();
     private List<SnapPointInfo> m_snapPoints = new List<SnapPointInfo>();
 
@@ -39,13 +40,14 @@ public class SnapController : MonoBehaviour
     void AddSnapPartAndSnapPointInfos(SnapPart snapPart)
     {
         snapPart.SnapController = this;
-        m_snapParts.Add(snapPart);
+        m_originalSnapParts.Add(snapPart);
 
         for (int i = 0; i < snapPart.SnapSettings.Length; i++)
         {
             SnapPointInfo info = new SnapPointInfo();
             info.Setting = snapPart.SnapSettings[i];
 
+            info.IsOriginal = true;
             info.ParentPart = snapPart;
             info.SnappedPart = null;
             info.SnappedPartIndex = -1;
@@ -156,6 +158,32 @@ public class SnapController : MonoBehaviour
 
             m_snapPoints.Add(info);
         }
+    }
+
+    public void ReleaseOtherParts()
+    {
+        for (int i = 0; i < m_snapPoints.Count; i++)
+        {
+            SnapPointInfo snapPoint = m_snapPoints[i];
+
+            if (snapPoint.IsOriginal)
+            {
+                if (snapPoint.State == SnapPointState.Snapped)
+                {
+                    snapPoint.State = SnapPointState.Free;
+                    snapPoint.SnappedPart.ReleaseFromCOntroller();
+                    snapPoint.SnappedPart = null;
+                    snapPoint.ParentPart = null;
+                }
+            }
+            else
+            {
+                m_snapPoints.RemoveAt(i);
+                i--;
+            }
+        }
+
+        m_snapParts.Clear();
     }
 #endregion
 
@@ -279,6 +307,7 @@ public class SnapPointInfo
 {
     public SnapePointSetting Setting;
 
+    public bool IsOriginal = false;
     public Vector3 Position => Setting.Position;
     public Vector3 LookDirection => Setting.LookDirection;
     public float AttractDistance => Setting.AttractDistance;

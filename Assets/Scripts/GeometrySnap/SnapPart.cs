@@ -91,6 +91,15 @@ public class SnapPart : MonoBehaviour
         m_isAttracting = false;
     }
 
+    public void ReleaseFromCOntroller()
+    {
+        transform.SetParent(null);
+        m_rigidbody2D.bodyType = RigidbodyType2D.Dynamic;
+        SnapController = null;
+        m_isAttracting = false;
+        m_shakeTimer = 0;
+    }
+
     void OnDrawGizmosSelected()
     {
         if (m_snapPoints == null)

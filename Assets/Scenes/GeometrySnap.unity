@@ -5513,7 +5513,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!212 &693837707
 SpriteRenderer:
   m_ObjectHideFlags: 0
@@ -5637,6 +5637,8 @@ MonoBehaviour:
   snapController: {fileID: 1236526715}
   rotateSpeed: 240
   moveSpeed: 5
+  shapeRenderer: {fileID: 2111606327}
+  releaseParameter: {fileID: 11400000, guid: 3a1e5df0932ca42a2ae73c5609384cd1, type: 2}
 --- !u!50 &1236526714
 Rigidbody2D:
   serializedVersion: 5
