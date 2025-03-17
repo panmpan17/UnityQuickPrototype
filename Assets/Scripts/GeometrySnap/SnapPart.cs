@@ -25,6 +25,8 @@ public class SnapPart : MonoBehaviour
     private RigibodyAttractParameter attractParameter;
     private float m_shakeTimer;
     private bool m_isAttracting = false;
+    private Vector2 m_pullToDirection;
+    private float m_pullToDirectionAngleOffset;
 
     void Awake()
     {
@@ -45,7 +47,10 @@ public class SnapPart : MonoBehaviour
             {
                 m_shakeTimer += Time.deltaTime;
                 attractParameter.GetShakeValues(attractParameter.TimerProgress(m_shakeTimer), out float speed, out float amplitude);
-                transform.rotation = Quaternion.Euler(0, 0, Mathf.Sin(Time.time % 1 * speed) * amplitude);
+
+                float angle = Mathf.Atan2(m_pullToDirection.y, m_pullToDirection.x) * Mathf.Rad2Deg;
+                angle += m_pullToDirectionAngleOffset;
+                transform.rotation = Quaternion.Euler(0, 0, angle + (Mathf.Sin(Time.time % 1 * speed) * amplitude));
             }
         }
         else
@@ -56,7 +61,10 @@ public class SnapPart : MonoBehaviour
                 if (m_shakeTimer > 0)
                 {
                     attractParameter.GetShakeValues(attractParameter.TimerProgress(m_shakeTimer), out float speed, out float amplitude);
-                    transform.rotation = Quaternion.Euler(0, 0, Mathf.Sin(Time.time % 1 * speed) * amplitude);
+
+                    float angle = Mathf.Atan2(m_pullToDirection.y, m_pullToDirection.x) * Mathf.Rad2Deg;
+                    angle += m_pullToDirectionAngleOffset;
+                    transform.rotation = Quaternion.Euler(0, 0, angle + (Mathf.Sin(Time.time % 1 * speed) * amplitude));
                 }
             }
         }
@@ -70,6 +78,8 @@ public class SnapPart : MonoBehaviour
         }
 
         Vector3 delta = pullTo - transform.position;
+        m_pullToDirection = delta;
+        m_pullToDirectionAngleOffset = Vector2.SignedAngle(Vector2.right, m_snapPoints[snapPointIndex].LookDirection);
         
         // float targetAngularVelocity = Vector2.Angle(delta, transform.TransformDirection(m_snapPoints[snapPointIndex].LookDirection));
         // m_rigidbody2D.angularVelocity += targetAngularVelocity;
@@ -89,6 +99,31 @@ public class SnapPart : MonoBehaviour
     public void StopAttracting()
     {
         m_isAttracting = false;
+    }
+
+    public void SnapToController(SnapController controller, SnapPointInfo snapPointInfo)
+    {
+        // Set parent and position
+        Transform controllerTransform = controller.transform;
+        transform.SetParent(controllerTransform);
+
+        Vector2 direction = controllerTransform.TransformDirection(snapPointInfo.LookDirection);
+        Quaternion rotation = Quaternion.Euler(0, 0, Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg);
+
+        Vector3 thisSnapPoint = snapPointInfo.Position;
+        Vector3 otherSnapPoint = m_snapPoints[snapPointInfo.SnappedPartIndex].Position;
+
+        Vector3 snapPosition = controllerTransform.TransformPoint(thisSnapPoint) - (rotation * otherSnapPoint);
+
+        transform.SetPositionAndRotation(snapPosition, rotation);
+        Rigidbody2D.bodyType = RigidbodyType2D.Kinematic;
+        Rigidbody2D.linearVelocity = Vector2.zero;
+        Rigidbody2D.angularVelocity = 0;
+
+        SnapController = controller;
+
+        m_isAttracting = false;
+        m_shakeTimer = 0;
     }
 
     public void ReleaseFromCOntroller()

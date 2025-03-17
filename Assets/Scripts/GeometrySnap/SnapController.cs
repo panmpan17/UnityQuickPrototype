@@ -113,26 +113,7 @@ public class SnapController : MonoBehaviour
     {
         m_snapPoints[snapPointIndex].State = SnapPointState.Snapped;
 
-        // Set parent and position
-        snapPart.transform.SetParent(transform);
-
-        Vector2 direction = transform.TransformDirection(m_snapPoints[snapPointIndex].LookDirection);
-        Quaternion rotation = Quaternion.Euler(0, 0, Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg);
-
-        Vector3 thisSnapPoint = m_snapPoints[snapPointIndex].Position;
-        Vector3 otherSnapPoint = snapPart.SnapSettings[m_snapPoints[snapPointIndex].SnappedPartIndex].Position;
-        Quaternion rotationDiff = Quaternion.Inverse(rotation) * snapPart.transform.rotation;
-
-        Vector3 snapPosition = transform.TransformPoint(thisSnapPoint) - (rotation * otherSnapPoint);
-
-        snapPart.transform.SetPositionAndRotation(snapPosition, rotation);
-        snapPart.Rigidbody2D.bodyType = RigidbodyType2D.Kinematic;
-        snapPart.Rigidbody2D.linearVelocity = Vector2.zero;
-        snapPart.Rigidbody2D.angularVelocity = 0;
-        // Destroy(snapPart.Rigidbody2D);
-
-        // Add snap part
-        snapPart.SnapController = this;
+        snapPart.SnapToController(this, m_snapPoints[snapPointIndex]);
         m_snapParts.Add(snapPart);
         
         // Add snap point infos
@@ -140,7 +121,7 @@ public class SnapController : MonoBehaviour
         for (int i = 0; i < snapPart.SnapSettings.Length; i++)
         {
             SnapPointInfo info = new SnapPointInfo();
-            info.Setting = snapPart.SnapSettings[i]; // Michael TODO: translate the position
+            info.Setting = snapPart.SnapSettings[i];
             info.Setting.Position = transform.InverseTransformPoint(snapPart.transform.TransformPoint(info.Position));
             info.Setting.LookDirection = transform.InverseTransformDirection(snapPart.transform.TransformDirection(info.LookDirection));
 
@@ -158,6 +139,25 @@ public class SnapController : MonoBehaviour
 
             m_snapPoints.Add(info);
         }
+
+        PlaySnapEffects(snapPointIndex, snapPart);
+    }
+
+    void PlaySnapEffects(int i, SnapPart snapPart)
+    {
+        audioSource.PlayOneShot(snapSound);
+
+        Vector3 snapedPoint = transform.TransformPoint(m_snapPoints[i].Position);
+        Vector3 delta = (snapedPoint - snapPart.transform.position).normalized;
+        snapImpulse.GenerateImpulse(new Vector3(delta.x * snapImpulseForce + Random.Range(-snapImpulseForce, snapImpulseForce),
+                                                delta.y * snapImpulseForce + Random.Range(-snapImpulseForce, snapImpulseForce),
+                                                0));
+
+        // var shap = snapPart.GetComponent<GeometryBaseShape>();
+        snapParticleMain.startColor = Color.white;
+        snapParticle.transform.position = snapedPoint;
+        snapParticle.transform.rotation = Quaternion.Euler(0, 0, Mathf.Atan2(delta.y, delta.x) * Mathf.Rad2Deg);
+        snapParticle.Play();
     }
 
     public void ReleaseOtherParts()
@@ -215,9 +215,34 @@ public class SnapController : MonoBehaviour
                 continue;
             }
 
-            // Michael TODO: improve this function call
-            snapPoint.SnappedPart.PullTowards(transform.TransformPoint(snapPoint.Position), snapPoint.SnappedPartIndex,
-                                              snapPoint.AttractStrength, snapPoint.AttractDistance, attractForceCurve);
+            Vector2 point = transform.TransformPoint(snapPoint.Position);
+            RaycastHit2D[] hits = Physics2D.LinecastAll(point, point + (Vector2)transform.TransformDirection(snapPoint.LookDirection * snapPoint.AttractDistance));
+
+            bool otherObjectIsHit = false;
+            bool snapPartIsInSight = false;
+            for (int j = 0; j < hits.Length; j++)
+            {
+                Transform root = hits[j].collider.transform.root;
+                if (root == snapPoint.SnappedPart.transform.root)
+                {
+                    snapPartIsInSight = true;
+                }
+                else if (root != transform)
+                {
+                    otherObjectIsHit = true;
+                }
+            }
+
+            if (snapPartIsInSight && !otherObjectIsHit)
+            {
+                // Michael TODO: improve this function call
+                snapPoint.SnappedPart.PullTowards(transform.TransformPoint(snapPoint.Position), snapPoint.SnappedPartIndex,
+                                                snapPoint.AttractStrength, snapPoint.AttractDistance, attractForceCurve);
+            }
+            else
+            {
+                snapPoint.SnappedPart.StopAttracting();
+            }
         }
     }
 #endregion
@@ -263,23 +288,11 @@ public class SnapController : MonoBehaviour
             if (m_snapPoints[i].SnappedPart == snapPart)
             {
                 SnapInfoSnapWithPart(i, snapPart);
-                audioSource.PlayOneShot(snapSound);
-
-                Vector3 snapedPoint = transform.TransformPoint(m_snapPoints[i].Position);
-                Vector3 delta = (snapedPoint - snapPart.transform.position).normalized;
-                snapImpulse.GenerateImpulse(new Vector3(delta.x * snapImpulseForce + Random.Range(-snapImpulseForce, snapImpulseForce),
-                                                        delta.y * snapImpulseForce + Random.Range(-snapImpulseForce, snapImpulseForce),
-                                                        0));
-
-                var shap = snapPart.GetComponent<GeometryBaseShape>();
-                snapParticleMain.startColor = Color.white;
-                snapParticle.transform.position = snapedPoint;
-                snapParticle.transform.rotation = Quaternion.Euler(0, 0, Mathf.Atan2(delta.y, delta.x) * Mathf.Rad2Deg);
-                snapParticle.Play();
                 break;
             }
         }
     }
+
 
     void OnDrawGizmos()
     {
