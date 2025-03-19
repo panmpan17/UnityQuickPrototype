@@ -114,6 +114,10 @@ public class SnapController : MonoBehaviour
         m_snapPoints[snapPointIndex].State = SnapPointState.Snapped;
 
         snapPart.SnapToController(this, m_snapPoints[snapPointIndex]);
+        if (m_snapParts.Count >= 1)
+        {
+            snapPart.transform.SetParent(m_snapParts[0].transform);
+        }
         m_snapParts.Add(snapPart);
         
         // Add snap point infos
@@ -162,6 +166,7 @@ public class SnapController : MonoBehaviour
 
     public void ReleaseOtherParts()
     {
+        SnapPart mainSnapPart = null;
         for (int i = 0; i < m_snapPoints.Count; i++)
         {
             SnapPointInfo snapPoint = m_snapPoints[i];
@@ -171,7 +176,8 @@ public class SnapController : MonoBehaviour
                 if (snapPoint.State == SnapPointState.Snapped)
                 {
                     snapPoint.State = SnapPointState.Free;
-                    snapPoint.SnappedPart.ReleaseFromCOntroller();
+                    snapPoint.SnappedPart.ReleaseFromController();
+                    mainSnapPart = snapPoint.SnappedPart;
                     snapPoint.SnappedPart = null;
                     snapPoint.ParentPart = null;
                 }
@@ -181,6 +187,11 @@ public class SnapController : MonoBehaviour
                 m_snapPoints.RemoveAt(i);
                 i--;
             }
+        }
+
+        if (mainSnapPart)
+        {
+            mainSnapPart.DetectChildrenSanpParts();
         }
 
         m_snapParts.Clear();
@@ -268,6 +279,11 @@ public class SnapController : MonoBehaviour
         m_isAttracting = false;
     }
 #endregion
+
+    public void OnPartCollisionEnter(SnapPart snapPart, Collision2D collision2D)
+    {
+        OnCollisionEnter2D(collision2D);
+    }
 
     void OnCollisionEnter2D(Collision2D collision2D)
     {

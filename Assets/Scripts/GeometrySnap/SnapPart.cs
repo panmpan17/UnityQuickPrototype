@@ -126,13 +126,35 @@ public class SnapPart : MonoBehaviour
         m_shakeTimer = 0;
     }
 
-    public void ReleaseFromCOntroller()
+    public void ReleaseFromController()
     {
         transform.SetParent(null);
         m_rigidbody2D.bodyType = RigidbodyType2D.Dynamic;
         SnapController = null;
         m_isAttracting = false;
         m_shakeTimer = 0;
+    }
+
+    public void DetectChildrenSanpParts()
+    {
+        SnapPart[] parts = GetComponentsInChildren<SnapPart>();
+        for (int i = 0; i < parts.Length; i++)
+        {
+            if (parts[i] == this)
+                continue;
+
+            Destroy(parts[i].Rigidbody2D);
+        }
+
+        Rigidbody2D.mass = parts.Length;
+    }
+
+    void OnCollisionEnter2D(Collision2D collision2D)
+    {
+        if (SnapController)
+        {
+            SnapController.OnPartCollisionEnter(this, collision2D);
+        }
     }
 
     void OnDrawGizmosSelected()

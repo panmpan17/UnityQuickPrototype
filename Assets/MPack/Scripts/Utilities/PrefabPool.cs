@@ -15,6 +15,7 @@ namespace MPack {
 
         public delegate T PrefabInstantiateFunc();
         public PrefabInstantiateFunc InstantiateFunc;
+        public System.Action<IPoolableObj> OnInstantiate;
 
         public List<T> AliveObjs, PoolObjs;
         public Transform PoolCollection;
@@ -95,6 +96,7 @@ namespace MPack {
                     component = GameObject.Instantiate(Prefab);
 
                 component.Instantiate();
+                OnInstantiate?.Invoke(component);
             }
 
             AliveObjs.Add(component);
