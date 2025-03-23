@@ -10,17 +10,21 @@ public class ShootProjectile : AbstractWeaponAddon
     private Timer shootInterval;
     [SerializeField]
     private Vector2 shootOffset;
+    [SerializeField]
+    private ProgressAnimationPart chargeAnimation;
     
     [Header("Rotate")]
     [SerializeField]
     private bool rotateToTarget;
+    [SerializeField]
+    private bool rotateThenWait;
     [SerializeField]
     private float rotateOffset;
     [SerializeField]
     private ValueWithEnable<float> slowRotate;
 
     [SerializeField]
-    private Transform m_target;
+    private TransformPointer target;
 
     private AbstractPowerUpAddon[] m_powerUps;
 
@@ -35,24 +39,45 @@ public class ShootProjectile : AbstractWeaponAddon
 
     void Update()
     {
-        if (!m_target)
+        if (!target || !target.HasTarget)
             return;
         
-        if (shootInterval.UpdateEnd)
+        if (rotateThenWait)
         {
+            shootInterval.Update();
+            chargeAnimation.UpdateProgress(shootInterval.Progress);
             if (rotateToTarget && !UpdateRotation())
             {
                 return;
             }
 
-            shootInterval.Reset();
-            Shoot();
+            if (shootInterval.Ended)
+            {
+                shootInterval.Reset();
+                Shoot();
+            }
         }
+        else
+        {
+            if (shootInterval.UpdateEnd)
+            {
+                if (rotateToTarget && !UpdateRotation())
+                {
+                    chargeAnimation.UpdateProgress(shootInterval.Progress);
+                    return;
+                }
+
+                shootInterval.Reset();
+                Shoot();
+            }
+            chargeAnimation.UpdateProgress(shootInterval.Progress);
+        }
+
     }
 
     bool UpdateRotation()
     {
-        Vector2 direction = m_target.position - transform.position;
+        Vector2 direction = target.Position - transform.position;
         float angle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg;
         angle += rotateOffset;
 
@@ -73,7 +98,7 @@ public class ShootProjectile : AbstractWeaponAddon
 
     void Shoot()
     {
-        Vector2 direction = m_target.position - transform.position;
+        Vector2 direction = target.Position - transform.position;
         direction.Normalize();
 
         GenericProjectile projectile = m_projectilePool.Get();

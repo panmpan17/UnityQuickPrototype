@@ -46,6 +46,7 @@ public class GeometryBaseShape : MonoBehaviour, IGeometryShapePart
         return mesh;
     }
 
+    [Header("Shape Data")]
     [SerializeField]
     private ShapeDirection shapeDirection;
     [SerializeField]
@@ -74,6 +75,12 @@ public class GeometryBaseShape : MonoBehaviour, IGeometryShapePart
     [SerializeField]
     private ValueWithEnable<float> outlineWidth;
 
+    [Header("Add on")]
+    [SerializeField]
+    private AddonPart addonPart;
+    private AbstractWeaponAddon weaponAddon;
+    private AbstractPowerUpAddon powerUpAddon;
+
     public ShapeDirection ShapeDirection => shapeDirection;
     public Vector2[] Vertices => vertices;
     public int[] Triangles => triangles;
@@ -86,6 +93,15 @@ public class GeometryBaseShape : MonoBehaviour, IGeometryShapePart
         if (m_mesh != null)
         {
             Destroy(m_mesh);
+        }
+
+        if (addonPart)
+        {
+            GameObject addon = Instantiate(addonPart.Prefab, transform);
+            weaponAddon = addon.GetComponent<AbstractWeaponAddon>();
+            powerUpAddon = addon.GetComponent<AbstractPowerUpAddon>();
+            randomHue = false;
+            hue = addonPart.OverrideColor;
         }
 
         m_meshFilter = GetComponent<MeshFilter>();
