@@ -229,22 +229,36 @@ public class SnapController : MonoBehaviour
             Vector2 point = transform.TransformPoint(snapPoint.Position);
             RaycastHit2D[] hits = Physics2D.LinecastAll(point, point + (Vector2)transform.TransformDirection(snapPoint.LookDirection * snapPoint.AttractDistance));
 
-            bool otherObjectIsHit = false;
             bool snapPartIsInSight = false;
+            // Vector2 otherObjectHitPoint = Vector3.zero;
+            // Vector2 snapPartHitPoint = Vector3.zero;
             for (int j = 0; j < hits.Length; j++)
             {
                 Transform root = hits[j].collider.transform.root;
                 if (root == snapPoint.SnappedPart.transform.root)
                 {
                     snapPartIsInSight = true;
+                    // snapPartHitPoint = hits[j].point;
+                    break;
                 }
-                else if (root != transform)
-                {
-                    otherObjectIsHit = true;
-                }
+                // else if (root != transform)
+                // {
+                //     otherObjectHitPoint = hits[j].point;
+                // }
             }
 
-            if (snapPartIsInSight && !otherObjectIsHit)
+            // if (otherObjectHitPoint != Vector2.zero)
+            // {
+            //     Vector2 delta1 = otherObjectHitPoint - point;
+            //     Vector2 delta2 = snapPartHitPoint - point;
+
+            //     if (delta1.sqrMagnitude < delta2.sqrMagnitude)
+            //     {
+            //         snapPartIsInSight = false;
+            //     }
+            // }
+
+            if (snapPartIsInSight)
             {
                 // Michael TODO: improve this function call
                 snapPoint.SnappedPart.PullTowards(transform.TransformPoint(snapPoint.Position), snapPoint.SnappedPartIndex,

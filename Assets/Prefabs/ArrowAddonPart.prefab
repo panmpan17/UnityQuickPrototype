@@ -189,6 +189,7 @@ MonoBehaviour:
     ReverseMode: 0
   shootOffset: {x: 0, y: 0.8}
   chargeAnimation: {fileID: 1169572278244259542}
+  shootSound: {fileID: 11400000, guid: d1231f97b329440bb9bed2273daeb830, type: 2}
   rotateToTarget: 1
   rotateThenWait: 1
   rotateOffset: -90

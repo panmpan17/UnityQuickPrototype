@@ -12,6 +12,8 @@ public class ShootProjectile : AbstractWeaponAddon
     private Vector2 shootOffset;
     [SerializeField]
     private ProgressAnimationPart chargeAnimation;
+    [SerializeField]
+    private AudioClipSet shootSound;
     
     [Header("Rotate")]
     [SerializeField]
@@ -104,6 +106,8 @@ public class ShootProjectile : AbstractWeaponAddon
         GenericProjectile projectile = m_projectilePool.Get();
         projectile.transform.position = transform.TransformPoint(shootOffset);
         projectile.Shoot(direction);
+
+        shootSound.PlayClipAtPoint(transform.position);
     }
 
     public override void ApplyPowerUp(AbstractPowerUpAddon[] powerUps)

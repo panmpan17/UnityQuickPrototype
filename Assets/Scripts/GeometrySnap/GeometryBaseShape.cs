@@ -97,9 +97,12 @@ public class GeometryBaseShape : MonoBehaviour, IGeometryShapePart
 
         if (addonPart)
         {
-            GameObject addon = Instantiate(addonPart.Prefab, transform);
-            weaponAddon = addon.GetComponent<AbstractWeaponAddon>();
-            powerUpAddon = addon.GetComponent<AbstractPowerUpAddon>();
+            if (addonPart.Prefab)
+            {
+                GameObject addon = Instantiate(addonPart.Prefab, transform);
+                weaponAddon = addon.GetComponent<AbstractWeaponAddon>();
+                powerUpAddon = addon.GetComponent<AbstractPowerUpAddon>();
+            }
             randomHue = false;
             hue = addonPart.OverrideColor;
         }

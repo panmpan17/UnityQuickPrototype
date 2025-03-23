@@ -9,6 +9,10 @@ public class GenericProjectile : MonoBehaviour, IPoolableObj
     private Timer lifeTime;
     [SerializeField]
     private float rotationOffset = -90;
+    [SerializeField]
+    private EffectReference hitEffect;
+    [SerializeField]
+    private AudioClipSet hitSound;
 
     private Rigidbody2D m_rigidbody;
 
@@ -60,5 +64,15 @@ public class GenericProjectile : MonoBehaviour, IPoolableObj
     {
         if (m_pool != null)
             m_pool.Put(this);
+        
+        if (hitEffect)
+        {
+            ContactPoint2D contact = collision.GetContact(0);
+            Quaternion rotation = Quaternion.Euler(0, 0, Mathf.Atan2(contact.normal.y, contact.normal.x) * Mathf.Rad2Deg);
+            hitEffect.AddWaitingList(contact.point, rotation);
+        }
+
+        if (hitSound)
+            hitSound.PlayClipAtPoint(transform.position);
     }
 }
