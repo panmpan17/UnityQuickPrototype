@@ -11,6 +11,7 @@ GameObject:
   - component: {fileID: 5355936152324158667}
   - component: {fileID: 5431958293285665285}
   - component: {fileID: 5793202226778382864}
+  - component: {fileID: 8638442018327556005}
   m_Layer: 0
   m_Name: FireAddonPart
   m_TagString: Untagged
@@ -112,3 +113,15 @@ MonoBehaviour:
     Interval: 0
   - Sprite: {fileID: -3499930701754477147, guid: 287037ddf01174876a2967d1a150e90d, type: 3}
     Interval: 0
+--- !u!114 &8638442018327556005
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3434654581402068726}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2dd2fda5c52914ce5ba7f242b1b00e9f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 

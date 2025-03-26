@@ -29,6 +29,9 @@ public class ShootProjectile : AbstractWeaponAddon
     private TransformPointer target;
 
     private AbstractPowerUpAddon[] m_powerUps;
+    private int m_burnPowerUpCount = 0;
+
+    private bool m_awakeBySnapToPlayer = false;
 
     void Awake()
     {
@@ -41,6 +44,9 @@ public class ShootProjectile : AbstractWeaponAddon
 
     void Update()
     {
+        if (!m_awakeBySnapToPlayer)
+            return;
+
         if (!target || !target.HasTarget)
             return;
         
@@ -105,6 +111,7 @@ public class ShootProjectile : AbstractWeaponAddon
 
         GenericProjectile projectile = m_projectilePool.Get();
         projectile.transform.position = transform.TransformPoint(shootOffset);
+        projectile.SetupPowerUps(m_burnPowerUpCount);
         projectile.Shoot(direction);
 
         shootSound.PlayClipAtPoint(transform.position);
@@ -112,6 +119,13 @@ public class ShootProjectile : AbstractWeaponAddon
 
     public override void ApplyPowerUp(AbstractPowerUpAddon[] powerUps)
     {
-        
+        // TODO: Implement this method
+        m_burnPowerUpCount = powerUps.Length;
+        Debug.Log("ApplyPowerUp: " + m_burnPowerUpCount);
+    }
+
+    public override void OnSnapToPlayer()
+    {
+        m_awakeBySnapToPlayer = true;
     }
 }

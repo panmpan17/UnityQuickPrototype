@@ -75,12 +75,6 @@ public class GeometryBaseShape : MonoBehaviour, IGeometryShapePart
     [SerializeField]
     private ValueWithEnable<float> outlineWidth;
 
-    [Header("Add on")]
-    [SerializeField]
-    private AddonPart addonPart;
-    private AbstractWeaponAddon weaponAddon;
-    private AbstractPowerUpAddon powerUpAddon;
-
     public ShapeDirection ShapeDirection => shapeDirection;
     public Vector2[] Vertices => vertices;
     public int[] Triangles => triangles;
@@ -93,18 +87,6 @@ public class GeometryBaseShape : MonoBehaviour, IGeometryShapePart
         if (m_mesh != null)
         {
             Destroy(m_mesh);
-        }
-
-        if (addonPart)
-        {
-            if (addonPart.Prefab)
-            {
-                GameObject addon = Instantiate(addonPart.Prefab, transform);
-                weaponAddon = addon.GetComponent<AbstractWeaponAddon>();
-                powerUpAddon = addon.GetComponent<AbstractPowerUpAddon>();
-            }
-            randomHue = false;
-            hue = addonPart.OverrideColor;
         }
 
         m_meshFilter = GetComponent<MeshFilter>();
@@ -122,6 +104,27 @@ public class GeometryBaseShape : MonoBehaviour, IGeometryShapePart
         {
             m_mesh = CreateMesh(ref vertices, ref triangles);
             m_meshFilter.mesh = m_mesh;
+        }
+    }
+
+    public void SetColor(float color)
+    {
+        randomHue = false;
+        hue = color;
+
+        if (m_mesh)
+        {
+            Vector2[] uv = new Vector2[m_mesh.vertices.Length];
+            for (int i = 0; i < vertices.Length; i++)
+            {
+                uv[i] = new Vector2(surfaceIntensity, hue);
+            }
+            for (int i = vertices.Length; i < uv.Length; i++)
+            {
+                uv[i] = new Vector2(outlineIntensity, hue);
+            }
+            
+            m_mesh.uv = uv;
         }
     }
 
@@ -210,28 +213,16 @@ public class GeometryBaseShape : MonoBehaviour, IGeometryShapePart
 
     void Update()
     {
-        if (!outlineWidth.Enable || !liveUpdate)
+        if (outlineWidth.Enable && liveUpdate)
         {
-            return;
-        }
-
-        if (m_oldHue != hue || m_oldSurfaceIntensity != surfaceIntensity || m_oldOutlineIntensity != outlineIntensity)
-        {
-            m_oldHue = hue;
-            m_oldSurfaceIntensity = surfaceIntensity;
-            m_oldOutlineIntensity = outlineIntensity;
-
-            Vector2[] uv = new Vector2[m_mesh.vertices.Length];
-            for (int i = 0; i < vertices.Length; i++)
+            if (m_oldHue != hue || m_oldSurfaceIntensity != surfaceIntensity || m_oldOutlineIntensity != outlineIntensity)
             {
-                uv[i] = new Vector2(surfaceIntensity, hue);
+                m_oldHue = hue;
+                m_oldSurfaceIntensity = surfaceIntensity;
+                m_oldOutlineIntensity = outlineIntensity;
+
+                SetColor(hue);
             }
-            for (int i = vertices.Length; i < uv.Length; i++)
-            {
-                uv[i] = new Vector2(outlineIntensity, hue);
-            }
-            
-            m_mesh.uv = uv;
         }
     }
 

@@ -28,6 +28,14 @@ public class SnapPart : MonoBehaviour
     private Vector2 m_pullToDirection;
     private float m_pullToDirectionAngleOffset;
 
+    private GeometryBaseShape m_baseShape;
+
+    [Header("Add on")]
+    [SerializeField]
+    private AddonPart addonPart;
+    private AbstractWeaponAddon m_weaponAddon;
+    private AbstractPowerUpAddon m_powerUpAddon;
+
     void Awake()
     {
         if (!m_rigidbody2D)
@@ -36,6 +44,19 @@ public class SnapPart : MonoBehaviour
         for (int i = 0; i < m_snapPoints.Length; i++)
         {
             m_snapPoints[i].LookDirationAngle = Vector2.SignedAngle(Vector2.right, m_snapPoints[i].LookDirection);
+        }
+
+        m_baseShape = GetComponent<GeometryBaseShape>();
+
+        if (addonPart)
+        {
+            if (addonPart.Prefab)
+            {
+                GameObject addon = Instantiate(addonPart.Prefab, transform);
+                m_weaponAddon = addon.GetComponent<AbstractWeaponAddon>();
+                m_powerUpAddon = addon.GetComponent<AbstractPowerUpAddon>();
+            }
+            m_baseShape.SetColor(addonPart.OverrideColor);
         }
     }
 
@@ -124,6 +145,8 @@ public class SnapPart : MonoBehaviour
 
         m_isAttracting = false;
         m_shakeTimer = 0;
+
+        m_weaponAddon?.OnSnapToPlayer();
     }
 
     public void ReleaseFromController()
@@ -137,13 +160,40 @@ public class SnapPart : MonoBehaviour
 
     public void DetectChildrenSanpParts()
     {
+        List<AbstractWeaponAddon> weaponAddons = new List<AbstractWeaponAddon>();
+        List<AbstractPowerUpAddon> powerUpAddons = new List<AbstractPowerUpAddon>();
+
+        if (m_weaponAddon)
+        {
+            weaponAddons.Add(m_weaponAddon);
+        }
+        if (m_powerUpAddon)
+        {
+            powerUpAddons.Add(m_powerUpAddon);
+        }
+
         SnapPart[] parts = GetComponentsInChildren<SnapPart>();
         for (int i = 0; i < parts.Length; i++)
         {
             if (parts[i] == this)
                 continue;
+            
+            if (parts[i].m_weaponAddon)
+            {
+                weaponAddons.Add(parts[i].m_weaponAddon);
+            }
+            if (parts[i].m_powerUpAddon)
+            {
+                powerUpAddons.Add(parts[i].m_powerUpAddon);
+            }
 
             Destroy(parts[i].Rigidbody2D);
+        }
+
+        AbstractPowerUpAddon[] powerUps = powerUpAddons.ToArray();
+        for (int i = 0; i < weaponAddons.Count; i++)
+        {
+            weaponAddons[i].ApplyPowerUp(powerUps);
         }
 
         Rigidbody2D.mass = parts.Length;
