@@ -24,6 +24,10 @@ public class SnapController : MonoBehaviour
     private List<SnapPart> m_snapParts = new List<SnapPart>();
     private List<SnapPointInfo> m_snapPoints = new List<SnapPointInfo>();
 
+    public System.Action OnSnapPartAdded;
+    public System.Action OnSnapPartRemoved;
+
+    public int SnapPartCount => m_snapParts.Count;
 
     void Awake()
     {
@@ -118,7 +122,12 @@ public class SnapController : MonoBehaviour
         {
             snapPart.transform.SetParent(m_snapParts[0].transform);
         }
-        m_snapParts.Add(snapPart);
+
+        SnapPart[] parts = snapPart.GetComponentsInChildren<SnapPart>();
+        for (int i = 0; i < parts.Length; i++)
+        {
+            m_snapParts.Add(parts[i]);
+        }
         
         // Add snap point infos
         int otherSnapPointIndex = m_snapPoints[snapPointIndex].SnappedPartIndex;
@@ -145,6 +154,7 @@ public class SnapController : MonoBehaviour
         }
 
         PlaySnapEffects(snapPointIndex, snapPart);
+        OnSnapPartAdded?.Invoke();
     }
 
     void PlaySnapEffects(int i, SnapPart snapPart)
@@ -195,6 +205,7 @@ public class SnapController : MonoBehaviour
         }
 
         m_snapParts.Clear();
+        OnSnapPartRemoved?.Invoke();
     }
 #endregion
 

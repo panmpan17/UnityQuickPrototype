@@ -15,7 +15,7 @@ GameObject:
   - component: {fileID: 3048691901219193736}
   - component: {fileID: 614204655047353280}
   - component: {fileID: 8676265667749748385}
-  m_Layer: 6
+  m_Layer: 0
   m_Name: Paty-Type-1-1
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -64,6 +64,7 @@ MonoBehaviour:
     IsSlot: 0
   m_rigidbody2D: {fileID: 614204655047353280}
   attractParameter: {fileID: 11400000, guid: 400f390683f494b32ad09278ad32b677, type: 2}
+  addonPart: {fileID: 0}
 --- !u!114 &1032158594338622476
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -101,7 +102,6 @@ MonoBehaviour:
   outlineWidth:
     Enable: 1
     Value: 0.2
-  addonPart: {fileID: 0}
   showGizmos: 0
 --- !u!23 &6372349313295719756
 MeshRenderer:
