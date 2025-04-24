@@ -1,0 +1,43 @@
+#pragma kernel CSMain
+
+struct RipplePoint
+{
+    float height;
+    float3 velocity;
+};
+
+RWStructuredBuffer<RipplePoint> rippleBuffer;
+
+// Variables set from the CPU 
+float deltaTime;
+
+[numthreads(8, 1, 1)]
+void CSMain (uint3 id : SV_DispatchThreadID)
+{
+	RipplePoint _point = rippleBuffer[id.x];
+
+    if (id.x >= 1)
+    {
+        RipplePoint _pointLeft = rippleBuffer[id.x - 1];
+        if (_pointLeft.velocity.x > 0.0)
+        {
+            // _point.height += _pointLeft.velocity.x * deltaTime;
+            _point.velocity.x += _pointLeft.velocity.x;
+        }
+    }
+
+    if (id.x < 126)
+    {
+        RipplePoint _pointRight = rippleBuffer[id.x + 1];
+        if (_pointRight.velocity.x < 0.0)
+        {
+            // _point.height += _pointRight.velocity.x * deltaTime;
+            _point.velocity.x += _pointRight.velocity.x;
+        }
+    }
+
+    // _point.height = max(_point.height - deltaTime, 0.0);
+    _point.velocity.x = max(_point.velocity.x - deltaTime, 0.0);
+
+    rippleBuffer[id.x] = _point;
+}
