@@ -317,7 +317,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &766240943
 Transform:
   m_ObjectHideFlags: 0
@@ -515,7 +515,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!64 &890875459
 MeshCollider:
   m_ObjectHideFlags: 0
@@ -601,7 +601,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 5, y: 5, z: 5}
+  m_LocalScale: {x: 10, y: 10, z: 10}
   m_ConstrainProportionsScale: 1
   m_Children: []
   m_Father: {fileID: 0}
@@ -620,7 +620,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   meshRenderer: {fileID: 890875460}
   computeShader: {fileID: 7200000, guid: 814217b2f37424279aafa16ef90558aa, type: 3}
-  rippleVerticleCount: 128
+  rippleVerticleCount: 256
+  forceTransferFactor: 0.5
+  speedDamping: 0.1
+  heightDamping: 0.1
+  affectedRadius: 10
+  affectedRadiusFallOff: 0
 --- !u!1 &993773405
 GameObject:
   m_ObjectHideFlags: 0

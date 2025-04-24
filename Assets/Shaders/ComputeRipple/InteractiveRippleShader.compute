@@ -3,41 +3,102 @@
 struct RipplePoint
 {
     float height;
-    float3 velocity;
+    float velocity;
 };
 
 RWStructuredBuffer<RipplePoint> rippleBuffer;
 
 // Variables set from the CPU 
+int bufferSize;
 float deltaTime;
+float forceTransferFactor;
+float speedDamping;
+float heightDamping;
 
-[numthreads(8, 1, 1)]
+int mouseInteractionIndex;
+// float mouseInteractionForce;
+float mouseInteractionRadius;
+bool mouseInteractionFalloff;
+
+float moveTowards(float current, float target, float maxDelta)
+{
+    if (current < target)
+    {
+        return min(current + maxDelta, target);
+    }
+    else
+    {
+        return max(current - maxDelta, target);
+    }
+}
+
+void calculateBufferNeighbors(int index, out RipplePoint _point)
+{
+    _point = rippleBuffer[index];
+
+    float heightSum = 0;
+    int indexMod = index % bufferSize;
+    if (indexMod > 0)
+    {
+        heightSum += rippleBuffer[index - 1].height;
+    }
+    if (indexMod < (bufferSize - 1))
+    {
+        heightSum += rippleBuffer[index + 1].height;
+    }
+
+    if (index >= bufferSize)
+    {
+        heightSum += rippleBuffer[index - bufferSize].height;
+    }
+    if (index < (bufferSize * bufferSize - bufferSize))
+    {
+        heightSum += rippleBuffer[index + bufferSize].height;
+    }
+
+    float force = heightSum - (_point.height * 4.0);
+
+    float velocity = _point.velocity + force * forceTransferFactor;
+    _point.velocity = moveTowards(velocity, 0, speedDamping * deltaTime);
+
+    float height = _point.height + _point.velocity * deltaTime;
+    _point.height = moveTowards(height, 0, heightDamping * deltaTime);
+}
+
+float2 indexToVector(int index)
+{
+    int x = index % bufferSize;
+    int y = index / bufferSize;
+    return float2(x, y);
+}
+
+[numthreads(64, 1, 1)]
 void CSMain (uint3 id : SV_DispatchThreadID)
 {
-	RipplePoint _point = rippleBuffer[id.x];
-
-    if (id.x >= 1)
+    if (mouseInteractionIndex != -1)
     {
-        RipplePoint _pointLeft = rippleBuffer[id.x - 1];
-        if (_pointLeft.velocity.x > 0.0)
+        float2 mouseInteractionPos = indexToVector(mouseInteractionIndex);
+        float2 currentPos = indexToVector(id.x);
+        float distance = length(mouseInteractionPos - currentPos);
+
+        if (distance <= mouseInteractionRadius)
         {
-            // _point.height += _pointLeft.velocity.x * deltaTime;
-            _point.velocity.x += _pointLeft.velocity.x;
+            if (mouseInteractionFalloff)
+            {
+                float force = 1.0 - (distance / mouseInteractionRadius);
+                rippleBuffer[id.x].height = force;
+            }
+            else
+            {
+                rippleBuffer[id.x].height = 1.0;
+            }
+            return;
         }
     }
 
-    if (id.x < 126)
     {
-        RipplePoint _pointRight = rippleBuffer[id.x + 1];
-        if (_pointRight.velocity.x < 0.0)
-        {
-            // _point.height += _pointRight.velocity.x * deltaTime;
-            _point.velocity.x += _pointRight.velocity.x;
-        }
+        RipplePoint _point;
+        calculateBufferNeighbors(id.x, _point);
+        rippleBuffer[id.x] = _point;
     }
-
-    // _point.height = max(_point.height - deltaTime, 0.0);
-    _point.velocity.x = max(_point.velocity.x - deltaTime, 0.0);
-
-    rippleBuffer[id.x] = _point;
 }
