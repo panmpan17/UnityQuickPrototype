@@ -510,7 +510,7 @@ GameObject:
   - component: {fileID: 890875459}
   - component: {fileID: 890875463}
   m_Layer: 0
-  m_Name: Quad
+  m_Name: InteracctiveRipple
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
