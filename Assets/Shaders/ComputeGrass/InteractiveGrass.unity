@@ -413,6 +413,10 @@ MonoBehaviour:
   grassCount: 10000
   spawnAreaStart: {x: -10, y: 0, z: -10}
   spawnAreaEnd: {x: 10, y: 0, z: 10}
+  affectedRadius: 1
+  affectedRadiusFallOff: 1
+  computeShader: {fileID: 7200000, guid: d2977761abbc4408387d6e93fcc14a79, type: 3}
+  meshRenderer: {fileID: 1260188791}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0

@@ -53,6 +53,6 @@ Material:
     - _LowerGreen: {r: 0.053676005, g: 0.31132078, b: 0, a: 1}
     - _RendererColor: {r: 1, g: 1, b: 1, a: 1}
     - _UpperGreen: {r: 0.2971779, g: 0.754717, b: 0.23851903, a: 1}
-    - _WindSpeed: {r: 0.19, g: 0.17, b: 1.89, a: 0.28}
+    - _WindSpeed: {r: 0.05, g: 0.08, b: 0.92, a: 0.28}
   m_BuildTextureStacks: []
   m_AllowLocking: 1

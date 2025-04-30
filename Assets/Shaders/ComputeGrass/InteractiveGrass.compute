@@ -1,0 +1,44 @@
+// Each #kernel tells which function to compile; you can have many kernels
+#pragma kernel CSMain
+
+struct GrassPoint{
+    float3 position;
+    float height;
+};
+
+RWStructuredBuffer<GrassPoint> grassPointBuffer;
+
+// Variables set from the CPU 
+uint bufferSize;
+float deltaTime;
+
+// int mouseInteractionIndex;
+// float mouseInteractionForce;
+float4 mouseInteractionPosition;
+float mouseInteractionRadius;
+bool mouseInteractionFalloff;
+
+[numthreads(128, 1, 1)]
+void CSMain (uint3 id : SV_DispatchThreadID)
+{
+    // grassPointBuffer[id.x].height += 1 * deltaTime;
+    if (mouseInteractionPosition.w != 0)
+    {
+        // float2 mouseInteractionPos = indexToVector(mouseInteractionIndex);
+        // float2 currentPos = indexToVector(id.x);
+        float distance = length(mouseInteractionPosition.xyz - grassPointBuffer[id.x].position);
+
+        if (distance <= mouseInteractionRadius)
+        {
+            if (mouseInteractionFalloff)
+            {
+                grassPointBuffer[id.x].height = min(grassPointBuffer[id.x].height, (distance / mouseInteractionRadius));
+            }
+            else
+            {
+                grassPointBuffer[id.x].height = 0.1;
+            }
+            return;
+        }
+    }
+}

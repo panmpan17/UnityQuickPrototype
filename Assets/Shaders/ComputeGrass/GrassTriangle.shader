@@ -31,8 +31,7 @@ Shader "Custom/GrassTriangle"
 
             // Pass from the csharp scrip
             StructuredBuffer<GrassPoint> grassPointBuffer;
-            float3 unity_CameraUp;
-            float3 unity_CameraRight;
+            float4 unity_CameraRotation;
 
             float unity_Time;
 
@@ -43,7 +42,6 @@ Shader "Custom/GrassTriangle"
             float4 _WindSpeed;
 
             sampler2D _NoiseTexture;
-            // SamplerState sampler_NoiseTexture;
             float _NoiseScale;
 
             struct appdata
@@ -61,6 +59,19 @@ Shader "Custom/GrassTriangle"
                 float height : TEXCOORD1;
             };
 
+            float4 qmul(float4 q1, float4 q2)
+            {
+                return float4(
+                    q2.xyz * q1.w + q1.xyz * q2.w + cross(q1.xyz, q2.xyz),
+                    q1.w * q2.w - dot(q1.xyz, q2.xyz)
+                );
+            }
+            float3 rotate_vector(float3 v, float4 r)
+            {
+                float4 r_c = r * float4(-1, -1, -1, 1);
+                return qmul(r, qmul(float4(v, 0), r_c)).xyz;
+            }
+
             v2f vert (appdata v)
             {
                 float3 basePosition = grassPointBuffer[v.instanceID].position;
@@ -72,29 +83,25 @@ Shader "Custom/GrassTriangle"
                 };
                 
 
-                float x = offsets[v.vertexID].x;
-                float y = offsets[v.vertexID].y * grassPointBuffer[v.instanceID].height;
-
-                float3 offsetWorld = x * unity_CameraRight;
-                offsetWorld += y * unity_CameraUp;
+                float3 offset = float3(offsets[v.vertexID].x,
+                                       offsets[v.vertexID].y * grassPointBuffer[v.instanceID].height,
+                                       0);
 
 
                 v2f o;
                 o.uv = float2(basePosition.x, basePosition.z) * _NoiseScale;
 
+                float3 offsetWorld = rotate_vector(offset, unity_CameraRotation);
                 if (v.vertexID == 2)
                 {
-                    float4 uv = float4(unity_Time * _WindSpeed.x + o.uv.x, unity_Time * _WindSpeed.y + o.uv.y, 0, 0);
+                    float4 uv = float4(unity_Time * _WindSpeed.x + basePosition.x, unity_Time * _WindSpeed.y + basePosition.y, 0, 0);
                     float noiseValue = tex2Dlod(_NoiseTexture, uv).x;
                     offsetWorld.x += noiseValue * _WindSpeed.z;
                     offsetWorld.z += noiseValue * _WindSpeed.w;
-
-                    // offsetWorld.x += sin(unity_Time * _WindSpeed.x) * _WindSpeed.z;
-                    // offsetWorld.z += sin(unity_Time * _WindSpeed.y) * _WindSpeed.w;
                 }
 
                 o.vertex = TransformWorldToHClip(basePosition + offsetWorld);
-                o.height = y;
+                o.height = offset.y;
                 return o;
             }
 
