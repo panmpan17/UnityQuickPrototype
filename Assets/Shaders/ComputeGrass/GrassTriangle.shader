@@ -96,8 +96,11 @@ Shader "Custom/GrassTriangle"
                 {
                     float4 uv = float4(unity_Time * _WindSpeed.x + basePosition.x, unity_Time * _WindSpeed.y + basePosition.y, 0, 0);
                     float noiseValue = tex2Dlod(_NoiseTexture, uv).x;
-                    offsetWorld.x += noiseValue * _WindSpeed.z;
-                    offsetWorld.z += noiseValue * _WindSpeed.w;
+                    float angle = (noiseValue * 2.0 - 1.0) * _WindSpeed.z;
+                    float4 quat = float4(0,  sin(angle * 0.5), 0, cos(angle * 0.5));
+
+                    offsetWorld = rotate_vector(offsetWorld, quat);
+                    // offsetWorld = rotate_vector(offsetWorld, float4(0, 0, 0, 1));
                 }
 
                 o.vertex = TransformWorldToHClip(basePosition + offsetWorld);
