@@ -4,6 +4,9 @@ Shader "Custom/GrassTriangle"
     {
         _LowerGreen("Lower Green", Color) = (0.0, 0.5, 0.0, 1.0)
         _UpperGreen("Upper Green", Color) = (0.0, 1.0, 0.0, 1.0)
+        _HighlightColor("Highlight Color", Color) = (1.0, 1.0, 1.0, 1.0)
+        // _WindColor("Wind Color", Color) = (1.0, 1.0, 1.0, 1.0)
+
         _NoiseTexture("Noise Texture", 2D) = "white" {}
         _NoiseScale("Noise Scale", Float) = 1.0
 
@@ -27,6 +30,7 @@ Shader "Custom/GrassTriangle"
             struct GrassPoint{
                 float3 position;
                 float height;
+                float4 rotation;
             };
 
             // Pass from the csharp scrip
@@ -38,6 +42,8 @@ Shader "Custom/GrassTriangle"
             // Pass from the material editor
             float4 _LowerGreen;
             float4 _UpperGreen;
+            float4 _HighlightColor;
+            // float4 _WindColor;
 
             float4 _WindSpeed;
 
@@ -92,6 +98,7 @@ Shader "Custom/GrassTriangle"
                 o.uv = float2(basePosition.x, basePosition.z) * _NoiseScale;
 
                 float3 offsetWorld = rotate_vector(offset, unity_CameraRotation);
+                // float4 combind = float4(offset.y, (float)v.vertexID, unity_Time * _WindSpeed.x + basePosition.x, unity_Time * _WindSpeed.y + basePosition.y);
                 if (v.vertexID == 2)
                 {
                     float4 uv = float4(unity_Time * _WindSpeed.x + basePosition.x, unity_Time * _WindSpeed.y + basePosition.y, 0, 0);
@@ -100,10 +107,12 @@ Shader "Custom/GrassTriangle"
                     float4 quat = float4(0,  sin(angle * 0.5), 0, cos(angle * 0.5));
 
                     offsetWorld = rotate_vector(offsetWorld, quat);
-                    // offsetWorld = rotate_vector(offsetWorld, float4(0, 0, 0, 1));
+                    offsetWorld = rotate_vector(offsetWorld, grassPointBuffer[v.instanceID].rotation);
                 }
 
+                
                 o.vertex = TransformWorldToHClip(basePosition + offsetWorld);
+                // o.combind = combind;
                 o.height = offset.y;
                 return o;
             }
@@ -113,7 +122,20 @@ Shader "Custom/GrassTriangle"
                 // float noiseValue = _NoiseTexture.Sample(sampler_NoiseTexture, i.uv).r;
                 float noiseValue = tex2D(_NoiseTexture, i.uv).r;
                 float4 greenColor = lerp(_LowerGreen, _UpperGreen, i.height / 2);
-                return lerp(greenColor, float4(1, 1, 0, 1), noiseValue); // white
+                float4 highlightColor = lerp(greenColor, _HighlightColor, noiseValue);
+
+                return highlightColor;
+                // if (i.combind.y > 1.7 && i.combind.y < 2.3)
+                // {
+                //     float2 uv = float2(i.combind.z, i.combind.w);
+                //     noiseValue = tex2D(_NoiseTexture, uv).r * 0.5;
+                //     return lerp(highlightColor, _WindColor, noiseValue);
+                //     // return _WindColor;
+                // }
+                // else
+                // {
+                //     return highlightColor;
+                // }
             }
             ENDHLSL
         }

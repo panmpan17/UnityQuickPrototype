@@ -46,13 +46,15 @@ Material:
     m_Ints: []
     m_Floats:
     - _EnableExternalAlpha: 0
-    - _NoiseScale: 4.17
+    - _NoiseScale: 0.05
     - _ZWrite: 0
     m_Colors:
     - _Color: {r: 1, g: 1, b: 1, a: 1}
+    - _HighlightColor: {r: 0.711948, g: 0.8773585, b: 0.27727836, a: 1}
     - _LowerGreen: {r: 0.053676005, g: 0.31132078, b: 0, a: 1}
     - _RendererColor: {r: 1, g: 1, b: 1, a: 1}
-    - _UpperGreen: {r: 0.2971779, g: 0.754717, b: 0.23851903, a: 1}
-    - _WindSpeed: {r: 0.05, g: 0.08, b: 0.92, a: 0.28}
+    - _UpperGreen: {r: 0.17968418, g: 0.8207547, b: 0.096787095, a: 1}
+    - _WindColor: {r: 1, g: 1, b: 1, a: 1}
+    - _WindSpeed: {r: 0.05, g: 0.02, b: 0.46, a: 0.28}
   m_BuildTextureStacks: []
   m_AllowLocking: 1

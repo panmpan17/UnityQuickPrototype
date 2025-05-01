@@ -119,6 +119,59 @@ NavMeshSettings:
     debug:
       m_Flags: 0
   m_NavMeshData: {fileID: 0}
+--- !u!1 &780965368
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 780965370}
+  - component: {fileID: 780965369}
+  m_Layer: 0
+  m_Name: InteractiveGrass (1)
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &780965369
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 780965368}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 47d6214674c7e425293e0897f37ff5c0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  material: {fileID: 2100000, guid: b850e30983b8e4fc3b891369cbb97689, type: 2}
+  grassCount: 12800
+  spawnAreaStart: {x: -10, y: 0, z: -10}
+  spawnAreaEnd: {x: 10, y: 0, z: 10}
+  affectedRadius: 1.5
+  affectedRadiusFallOff: 1
+  computeShader: {fileID: 7200000, guid: d2977761abbc4408387d6e93fcc14a79, type: 3}
+  noiseTexture: {fileID: 2800000, guid: 6cde9a47d4a3d4944a98dc1f19c25801, type: 3}
+  meshRenderer: {fileID: 1260188791}
+--- !u!4 &780965370
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 780965368}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1260188789
 GameObject:
   m_ObjectHideFlags: 0
@@ -223,7 +276,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 2.1, y: 1, z: 2.1}
+  m_LocalScale: {x: 6, y: 1, z: 6}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
@@ -314,13 +367,13 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1759050566}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.45326447, y: -0, z: -0, w: 0.89137614}
-  m_LocalPosition: {x: 0, y: 12.98, z: -11.13}
+  m_LocalRotation: {x: 0.40701202, y: -0, z: -0, w: 0.91342276}
+  m_LocalPosition: {x: 0, y: 12.1, z: -12.2}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 53.907, y: 0, z: 0}
+  m_LocalEulerAnglesHint: {x: 48.034, y: 0, z: 0}
 --- !u!114 &1759050570
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -381,7 +434,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &2002636673
 Transform:
   m_ObjectHideFlags: 0
@@ -410,12 +463,13 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   material: {fileID: 2100000, guid: b850e30983b8e4fc3b891369cbb97689, type: 2}
-  grassCount: 10000
-  spawnAreaStart: {x: -10, y: 0, z: -10}
-  spawnAreaEnd: {x: 10, y: 0, z: 10}
-  affectedRadius: 1
+  grassCount: 64000
+  spawnAreaStart: {x: -30, y: 0, z: -30}
+  spawnAreaEnd: {x: 30, y: 0, z: 30}
+  affectedRadius: 1.5
   affectedRadiusFallOff: 1
   computeShader: {fileID: 7200000, guid: d2977761abbc4408387d6e93fcc14a79, type: 3}
+  noiseTexture: {fileID: 2800000, guid: 6cde9a47d4a3d4944a98dc1f19c25801, type: 3}
   meshRenderer: {fileID: 1260188791}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
@@ -424,3 +478,4 @@ SceneRoots:
   - {fileID: 1759050569}
   - {fileID: 2002636673}
   - {fileID: 1260188793}
+  - {fileID: 780965370}

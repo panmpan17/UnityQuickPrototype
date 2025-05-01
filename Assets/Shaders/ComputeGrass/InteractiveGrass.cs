@@ -18,6 +18,8 @@ public class InteractiveGrass : MonoBehaviour
 
     [SerializeField]
     private ComputeShader computeShader;
+    [SerializeField]
+    private Texture noiseTexture;
 
     [SerializeField]
     private MeshRenderer meshRenderer;
@@ -66,6 +68,7 @@ public class InteractiveGrass : MonoBehaviour
 
         computeShader.SetFloat("mouseInteractionRadius", affectedRadius);
         computeShader.SetBool("mouseInteractionFalloff", affectedRadiusFallOff);
+        // computeShader.SetTexture(m_kernelID, "samplerNoiseTexture", noiseTexture);
 
         m_shader_UnityCameraRotation = Shader.PropertyToID("unity_CameraRotation");
         m_shader_UnityTime = Shader.PropertyToID("unity_Time");
@@ -99,11 +102,12 @@ public class InteractiveGrass : MonoBehaviour
             grassPoints[i] = new GrassPoint
             {
                 position = randomPos,
-                height = Random.Range(0.5f, 2.0f)
+                height = Random.Range(0.5f, 2.0f),
+                rotation = new Vector4(0, 0, 0, 1),
             };
         }
 
-        m_grassBuffer = new ComputeBuffer(grassCount, sizeof(float) * 4);
+        m_grassBuffer = new ComputeBuffer(grassCount, sizeof(float) * 8);
         m_grassBuffer.SetData(grassPoints);
     }
 
@@ -144,6 +148,7 @@ public class InteractiveGrass : MonoBehaviour
         computeShader.SetVector(m_shader_mouseInteractionPosition, m_mousePosition);
         computeShader.SetFloat(m_shader_deltaTime, Time.deltaTime);
         computeShader.SetInt(m_shader_mouseInteractionIndex, m_mouseIndex);
+        computeShader.SetFloat(m_shader_UnityTime, Time.time);
         computeShader.Dispatch(m_kernelID, m_groupSizeX, 1, 1);
 
         Draw();
@@ -163,5 +168,6 @@ public class InteractiveGrass : MonoBehaviour
     {
         public Vector3 position;
         public float height;
+        public Vector4 rotation;
     }
 }

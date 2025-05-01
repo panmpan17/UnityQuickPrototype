@@ -4,6 +4,7 @@
 struct GrassPoint{
     float3 position;
     float height;
+    float4 rotation;
 };
 
 RWStructuredBuffer<GrassPoint> grassPointBuffer;
@@ -11,6 +12,10 @@ RWStructuredBuffer<GrassPoint> grassPointBuffer;
 // Variables set from the CPU 
 uint bufferSize;
 float deltaTime;
+float unity_Time;
+
+// Texture2D<float4> NoiseTexture;
+// SamplerState samplerNoiseTexture;
 
 // int mouseInteractionIndex;
 // float mouseInteractionForce;
@@ -18,27 +23,51 @@ float4 mouseInteractionPosition;
 float mouseInteractionRadius;
 bool mouseInteractionFalloff;
 
-[numthreads(128, 1, 1)]
+float moveTowards(float current, float target, float maxDelta)
+{
+    if (current < target)
+    {
+        return min(current + maxDelta, target);
+    }
+    else
+    {
+        return max(current - maxDelta, target);
+    }
+}
+
+[numthreads(256, 1, 1)]
 void CSMain (uint3 id : SV_DispatchThreadID)
 {
-    // grassPointBuffer[id.x].height += 1 * deltaTime;
+    // float4 uv = float4(unity_Time + grassPointBuffer[id.x].position.x,
+    //                    unity_Time + grassPointBuffer[id.x].position.y, 0, 0);
+    // float noiseValue = tex2Dlod(samplerNoiseTexture, uv).r;
+
     if (mouseInteractionPosition.w != 0)
     {
-        // float2 mouseInteractionPos = indexToVector(mouseInteractionIndex);
-        // float2 currentPos = indexToVector(id.x);
         float distance = length(mouseInteractionPosition.xyz - grassPointBuffer[id.x].position);
 
         if (distance <= mouseInteractionRadius)
         {
-            if (mouseInteractionFalloff)
+            float previousAngle = 2.0 * atan2(grassPointBuffer[id.x].rotation.y, grassPointBuffer[id.x].rotation.w);
+            float angle = (1.0 - distance / mouseInteractionRadius) * 2;
+
+            if (mouseInteractionPosition.x > grassPointBuffer[id.x].position.x)
             {
-                grassPointBuffer[id.x].height = min(grassPointBuffer[id.x].height, (distance / mouseInteractionRadius));
+                angle = -angle;
             }
-            else
-            {
-                grassPointBuffer[id.x].height = 0.1;
-            }
+
+            // angle = moveTowards(previousAngle, angle, 4 * deltaTime);
+
+            grassPointBuffer[id.x].rotation = float4(0, sin(angle * 0.5), 0, cos(angle * 0.5));
+
             return;
         }
     }
+
+
+    float previousAngle = 2.0 * atan2(grassPointBuffer[id.x].rotation.y, grassPointBuffer[id.x].rotation.w);
+    // float angle = (sin(unity_Time + grassPointBuffer[id.x].position.z) * 2.0 - 1.0) * 0.13f;
+
+    float angle = moveTowards(previousAngle, 0, 2 * deltaTime);
+    grassPointBuffer[id.x].rotation = float4(0, sin(angle * 0.5), 0, cos(angle * 0.5));
 }
