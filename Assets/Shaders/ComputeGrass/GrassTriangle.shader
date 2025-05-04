@@ -78,6 +78,23 @@ Shader "Custom/GrassTriangle"
                 return qmul(r, qmul(float4(v, 0), r_c)).xyz;
             }
 
+            float4 QuaternionFromYawPitch(float yaw, float pitch)
+            {
+                float cy = cos(yaw * 0.5);
+                float sy = sin(yaw * 0.5);
+                float cp = cos(pitch * 0.5);
+                float sp = sin(pitch * 0.5);
+
+                // No roll, so cr = 1, sr = 0
+                float4 q;
+                q.x = sp * cy;  // pitch
+                q.y = cp * sy;  // yaw
+                q.z = -sp * sy; // combination
+                q.w = cp * cy;  // overall scalar
+
+                return q;
+            }
+
             v2f vert (appdata v)
             {
                 float3 basePosition = grassPointBuffer[v.instanceID].position;
@@ -103,8 +120,10 @@ Shader "Custom/GrassTriangle"
                 {
                     float4 uv = float4(unity_Time * _WindSpeed.x + basePosition.x, unity_Time * _WindSpeed.y + basePosition.y, 0, 0);
                     float noiseValue = tex2Dlod(_NoiseTexture, uv).x;
-                    float angle = (noiseValue * 2.0 - 1.0) * _WindSpeed.z;
+                    float angle = noiseValue * _WindSpeed.z;
                     float4 quat = float4(0,  sin(angle * 0.5), 0, cos(angle * 0.5));
+
+                    // float4 quat = QuaternionFromYawPitch(noiseValue * _WindSpeed.z, noiseValue * _WindSpeed.w);
 
                     offsetWorld = rotate_vector(offsetWorld, quat);
                     offsetWorld = rotate_vector(offsetWorld, grassPointBuffer[v.instanceID].rotation);
