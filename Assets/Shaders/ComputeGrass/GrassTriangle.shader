@@ -25,7 +25,10 @@ Shader "Custom/GrassTriangle"
             #pragma vertex vert
             #pragma fragment frag
 
-            #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
+            #pragma multi_compile_fog
+
+            // #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
+            #include "UnityCG.cginc"
 
             struct GrassPoint{
                 float3 position;
@@ -61,6 +64,7 @@ Shader "Custom/GrassTriangle"
             struct v2f
             {
                 float2 uv : TEXCOORD0;
+                UNITY_FOG_COORDS(2)
                 float4 vertex : SV_POSITION;
                 float height : TEXCOORD1;
             };
@@ -130,7 +134,8 @@ Shader "Custom/GrassTriangle"
                 }
 
                 
-                o.vertex = TransformWorldToHClip(basePosition + offsetWorld);
+                o.vertex = UnityObjectToClipPos(basePosition + offsetWorld);
+                UNITY_TRANSFER_FOG(o, o.vertex);
                 // o.combind = combind;
                 o.height = offset.y;
                 return o;
@@ -142,6 +147,8 @@ Shader "Custom/GrassTriangle"
                 float noiseValue = tex2D(_NoiseTexture, i.uv).r;
                 float4 greenColor = lerp(_LowerGreen, _UpperGreen, i.height / 2);
                 float4 highlightColor = lerp(greenColor, _HighlightColor, noiseValue);
+
+                UNITY_APPLY_FOG(i.fogCoord, highlightColor);
 
                 return highlightColor;
                 // if (i.combind.y > 1.7 && i.combind.y < 2.3)

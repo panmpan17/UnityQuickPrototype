@@ -1,0 +1,40 @@
+// Each #kernel tells which function to compile; you can have many kernels
+#pragma kernel InteractiveCricket
+
+struct Cricket {
+    float3 position;
+    float3 velocity;
+};
+
+RWStructuredBuffer<Cricket> cricketBuffer;
+
+// Variables set from the CPU 
+float deltaTime;
+float3 jumpParameters; // (jumpHorizontalForce, jumpVerticalForce, gravity)
+
+float4 interactionPosition;
+float interactionRadius;
+
+[numthreads(16, 1, 1)]
+void InteractiveCricket (uint3 id : SV_DispatchThreadID)
+{
+    // If still on the ground
+    if (cricketBuffer[id.x].position.y <= 0.1f)
+    {
+        float distance = length(interactionPosition.xyz - cricketBuffer[id.x].position);
+        if (distance <= interactionRadius)
+        {
+            float2 direction2d = float2(cricketBuffer[id.x].position.x - interactionPosition.x, cricketBuffer[id.x].position.z - interactionPosition.z);
+            direction2d = normalize(direction2d);
+
+            cricketBuffer[id.x].velocity = float3(direction2d.x * jumpParameters.x, jumpParameters.y, direction2d.y * jumpParameters.x);
+            cricketBuffer[id.x].position += cricketBuffer[id.x].velocity * deltaTime;
+            cricketBuffer[id.x].position.y = max(cricketBuffer[id.x].position.y, 0.11f);
+        }
+
+        return;
+    }
+
+    cricketBuffer[id.x].position += cricketBuffer[id.x].velocity * deltaTime;
+    cricketBuffer[id.x].velocity.y += jumpParameters.z * deltaTime;
+}

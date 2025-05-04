@@ -8,7 +8,6 @@ public class AnimatorReceiver : MonoBehaviour
 
     public void TriggerAnimationEvent(int eventType)
     {
-        Debug.Log($"Animation event triggered with type: {eventType}");
         onAnimationEventTriggered?.Invoke(eventType);
     }
 }
