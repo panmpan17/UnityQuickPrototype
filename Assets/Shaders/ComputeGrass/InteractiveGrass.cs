@@ -211,6 +211,15 @@ public class InteractiveGrass : MonoBehaviour
         m_mouseDown = false;
     }
 
+    void OnDestroy()
+    {
+        if (m_grassBuffer != null)
+        {
+            m_grassBuffer.Release();
+            m_grassBuffer = null;
+        }
+    }
+
     public struct GrassPoint
     {
         public Vector3 position;

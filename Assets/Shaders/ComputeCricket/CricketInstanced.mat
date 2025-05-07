@@ -20,8 +20,8 @@ Material:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: Cricket
-  m_Shader: {fileID: 4800000, guid: 264b385c7013f4e0fbcffeced98e4e9a, type: 3}
+  m_Name: CricketInstanced
+  m_Shader: {fileID: 4800000, guid: 4a3570c40bc3047819354620d45b3a33, type: 3}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
   m_ValidKeywords: []
@@ -30,7 +30,8 @@ Material:
   m_EnableInstancingVariants: 0
   m_DoubleSidedGI: 0
   m_CustomRenderQueue: -1
-  stringTagMap: {}
+  stringTagMap:
+    RenderType: Opaque
   disabledShaderPasses: []
   m_LockedProperties: 
   m_SavedProperties:
@@ -111,14 +112,18 @@ Material:
     - _EnvironmentReflections: 1
     - _GlossMapScale: 0
     - _Glossiness: 0
+    - _GlossinessSource: 0
     - _GlossyReflections: 0
     - _Metallic: 0
     - _OcclusionStrength: 1
     - _Parallax: 0.005
     - _QueueOffset: 0
     - _ReceiveShadows: 1
+    - _Shininess: 0
     - _Smoothness: 0.5
+    - _SmoothnessSource: 0
     - _SmoothnessTextureChannel: 0
+    - _SpecSource: 0
     - _SpecularHighlights: 1
     - _SrcBlend: 1
     - _SrcBlendAlpha: 1
@@ -126,8 +131,8 @@ Material:
     - _WorkflowMode: 1
     - _ZWrite: 1
     m_Colors:
-    - _BaseColor: {r: 1, g: 1, b: 1, a: 1}
-    - _Color: {r: 1, g: 1, b: 1, a: 1}
+    - _BaseColor: {r: 0.20936066, g: 0.5566038, b: 0.16540584, a: 1}
+    - _Color: {r: 0.20936063, g: 0.5566037, b: 0.16540581, a: 1}
     - _Color1: {r: 1, g: 1, b: 1, a: 1}
     - _Color2: {r: 1, g: 1, b: 1, a: 1}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}

@@ -1001,8 +1001,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 105b289b89e2e43928f70ef650cf5e9b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  material: {fileID: 2100000, guid: 110a5b8a53a344c65a8869ae627799fd, type: 2}
-  cricketCount: 300
+  mesh: {fileID: 4068530342146984043, guid: 0ddd3b4f05ac4416096a8dc3201a239c, type: 3}
+  material: {fileID: 2100000, guid: 03b02a432a9d24206bfb29f321d5f95d, type: 2}
+  cricketCount: 256
   spawnAreaStart: {x: -30, y: 0, z: -30}
   spawnAreaEnd: {x: 30, y: 0, z: 30}
   computeShader: {fileID: 7200000, guid: 7673fb9d1f71447a98bf0300028c4e89, type: 3}
