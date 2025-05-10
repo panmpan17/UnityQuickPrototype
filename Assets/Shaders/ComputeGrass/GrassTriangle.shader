@@ -14,7 +14,12 @@ Shader "Custom/GrassTriangle"
     }
     SubShader
     {
-        Tags { "RenderType"="Opaque" }
+        Tags {
+            "RenderType"="Opaque"
+            "RenderPipeline" = "UniversalPipeline"
+            "UniversalMaterialType" = "Lit"
+            "IgnoreProjector" = "True"
+        }
         LOD 100
 
         Pass
@@ -26,9 +31,11 @@ Shader "Custom/GrassTriangle"
             #pragma fragment frag
 
             #pragma multi_compile_fog
+            #pragma multi_compile _ _MAIN_LIGHT_SHADOWS _MAIN_LIGHT_SHADOWS_CASCADE _MAIN_LIGHT_SHADOWS_SCREEN
 
-            // #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
-            #include "UnityCG.cginc"
+            // #include "UnityCG.cginc"
+            #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
+            #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Lighting.hlsl"
 
             struct GrassPoint{
                 float3 position;
@@ -64,9 +71,10 @@ Shader "Custom/GrassTriangle"
             struct v2f
             {
                 float2 uv : TEXCOORD0;
-                UNITY_FOG_COORDS(2)
                 float4 vertex : SV_POSITION;
                 float height : TEXCOORD1;
+                // UNITY_FOG_COORDS(2)
+                float4 shadowCoord : TEXCOORD3;
             };
 
             float4 qmul(float4 q1, float4 q2)
@@ -134,10 +142,15 @@ Shader "Custom/GrassTriangle"
                 }
 
                 
-                o.vertex = UnityObjectToClipPos(basePosition + offsetWorld);
-                UNITY_TRANSFER_FOG(o, o.vertex);
+                o.vertex = TransformObjectToHClip(basePosition + offsetWorld);
+                // UNITY_TRANSFER_FOG(o, o.vertex);
                 // o.combind = combind;
                 o.height = offset.y;
+
+                VertexPositionInputs positions = GetVertexPositionInputs(basePosition + offsetWorld);
+                float4 shadowCoordinates = GetShadowCoord(positions);
+
+                o.shadowCoord = shadowCoordinates;
                 return o;
             }
 
@@ -148,9 +161,12 @@ Shader "Custom/GrassTriangle"
                 float4 greenColor = lerp(_LowerGreen, _UpperGreen, i.height / 2);
                 float4 highlightColor = lerp(greenColor, _HighlightColor, noiseValue);
 
-                UNITY_APPLY_FOG(i.fogCoord, highlightColor);
+// #if defined(FOG_LINEAR) || defined(FOG_EXP) || defined(FOG_EXP2)
+//                 UNITY_APPLY_FOG(i.fogCoord, highlightColor);
+// #endif
 
-                return highlightColor;
+                half shadowAmount = MainLightRealtimeShadow(i.shadowCoord);
+                return highlightColor * shadowAmount;
                 // if (i.combind.y > 1.7 && i.combind.y < 2.3)
                 // {
                 //     float2 uv = float2(i.combind.z, i.combind.w);
