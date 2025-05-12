@@ -168,16 +168,16 @@ Shader "Custom/GrassTriangle"
 
                 half shadowAmount = MainLightRealtimeShadow(i.shadowCoord);
                 return highlightColor * shadowAmount;
-                // if (i.combind.y > 1.7 && i.combind.y < 2.3)
+                // if (i.height > 1.7 && i.height < 2.3)
                 // {
                 //     float2 uv = float2(i.combind.z, i.combind.w);
                 //     noiseValue = tex2D(_NoiseTexture, uv).r * 0.5;
-                //     return lerp(highlightColor, _WindColor, noiseValue);
+                //     return lerp(highlightColor * shadowAmount, _WindColor * shadowAmount, noiseValue);
                 //     // return _WindColor;
                 // }
                 // else
                 // {
-                //     return highlightColor;
+                //     return highlightColor * shadowAmount;
                 // }
             }
             ENDHLSL
