@@ -42,6 +42,12 @@ namespace MPack {
                 RunTime = amount;
         }
 
+        public void ResetContinuous()
+        {
+            RunTime = RunTime % TargetTime;
+            
+        }
+
         /// <summary>
         /// Progress of the timer
         /// </summary>
