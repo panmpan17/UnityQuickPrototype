@@ -5,6 +5,7 @@ public class AudioReader : MonoBehaviour
 {
     [SerializeField]
     AudioSource audioSource;
+
     AudioClip audioClip;
     [SerializeField]
     LineRenderer lineRenderer;
@@ -26,7 +27,18 @@ public class AudioReader : MonoBehaviour
 
     void Start()
     {
-        audioClip = audioSource.clip;
+        if (audioSource == null)
+        {
+            return;
+        }
+
+        SetAudioClip(audioSource.clip);
+    }
+
+    public void SetAudioClip(AudioClip clip)
+    {
+        audioClip = clip;
+
         sampleSize = Mathf.RoundToInt(audioClip.frequency * 0.02f);
         m_timer = new Timer(0.02f);
 
@@ -43,7 +55,7 @@ public class AudioReader : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (m_timer.UpdateEnd)
+        if (audioClip && m_timer.UpdateEnd)
         {
             m_timer.ResetContinuous();
             m_offset += sampleSize;
